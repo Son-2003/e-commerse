@@ -19,6 +19,11 @@ a.active hr {
   font-style: normal;
 }
 
+/* Ẩn các scrollbar */
+::-webkit-scrollbar {
+  display: none;
+}
+
 @media (max-width: 640px) {
   a.active {
     background-color: black;
