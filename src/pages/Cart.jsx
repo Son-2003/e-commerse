@@ -25,7 +25,7 @@ const Cart = () => {
     setCartData(tempData);
   }, [cartItems])
   return (
-    <div className='border-t pt-14'>
+    <div className='border-t pt-14 px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]'>
       <div className='text-2xl mb-3'>
         <Title text1={'YOUR'} text2={'CART'}/>
       </div>

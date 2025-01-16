@@ -1,5 +1,6 @@
 import React from 'react'
 import Hero from '../components/Hero'
+import Hero2 from '../components/Hero2'
 import LastCollection from '../components/LastCollection'
 import BestSeller from '../components/BestSeller'
 import OurPolicy from '../components/OurPolicy'
@@ -10,6 +11,7 @@ const Home = () => {
     <div>
       <Hero/>
       <LastCollection/>
+      <Hero2/>
       <BestSeller/>
       <OurPolicy/>
       <NewsletterBox/>

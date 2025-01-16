@@ -31,7 +31,7 @@ const Collection = () => {
   const applyFilter = () => {
     let productFilter = products.slice();
 
-    if(showSearch && search){
+    if(search){
       productFilter = productFilter.filter(item => item.name.toLowerCase().includes(search.toLowerCase()));
     }
 
@@ -66,14 +66,14 @@ const Collection = () => {
 
   useEffect(() => {
     applyFilter()
-  }, [category, subCategory, search, showSearch])
+  }, [category, subCategory, search])
 
   useEffect(() => {
     sortProducts()
   }, [sortType])
 
   return (
-    <div className='flex flex-col sm:flex-row gap-1 sm:gap-10 pt-10 border-t'>
+    <div className='flex flex-col sm:flex-row gap-1 sm:gap-10 pt-10 border-t px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]'>
 
       {/* Filter Options */}
       <div className='min-w-60'>

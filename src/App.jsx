@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import {Routes, Route} from 'react-router-dom'
 import Home from './pages/Home'
 import Collection from './pages/Collection'
@@ -16,14 +16,38 @@ import { ToastContainer, toast } from 'react-toastify';
   import 'react-toastify/dist/ReactToastify.css';
 
 const App = () => {
+
+  const [showButton, setShowButton] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 300) {
+        setShowButton(true);
+      } else {
+        setShowButton(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+
+    // Cleanup listener when component unmounts
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
   return (
-    <div className='px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]'>
+    <div className=''>
       <ToastContainer />
       <Navbar/>
       <SearchBar/>
       <Routes>
         <Route path='/' element={<Home/>}/>
         <Route path='/collection' element={<Collection/>}/>
+        <Route path='/newproduct' element={<Collection/>}/>
+        <Route path='/favorite' element={<Collection/>}/>
+        <Route path='/restock' element={<Collection/>}/>
+        <Route path='/shop' element={<Collection/>}/>
         <Route path='/about' element={<About/>}/>
         <Route path='/contact' element={<Contact/>}/>
         <Route path='/product/:productId' element={<Product/>}/>
@@ -33,6 +57,17 @@ const App = () => {
         <Route path='/order' element={<Orders/>}/>
       </Routes>
       <Footer/>
+      {/* Sticky "Back to Top" Button */}
+      {showButton && (
+        <div className="fixed bottom-5 right-5 z-50 transition-all duration-300">
+          <button
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            className="bg-black text-white py-4 px-6 rounded-full shadow-lg text-xl"
+          >
+            ↑
+          </button>
+        </div>      
+      )}
     </div>
   )
 }

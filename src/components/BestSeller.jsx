@@ -8,12 +8,12 @@ const BestSeller = () => {
     const [bestSeller, setBestSeller] = useState([])
 
     useEffect(() => {
-        const bestProduct = products.filter(item => item.bestseller)
-        setBestSeller(bestProduct.slice(0, 5));
+        // const bestProduct = products.filter(item => item.bestseller)
+        setBestSeller(products.slice(0, 10));
     }, [])
 
   return (
-    <div className='my-10'>
+    <div className='my-10 px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]'>
         <div className='text-center py-8 text-3xl'>
             <Title text1={'BEST'} text2={'SELLERS'}/>
             <p className='w-3/4 m-auto text-xs sm:text-sm md:text-base text-gray-600'>
@@ -28,6 +28,9 @@ const BestSeller = () => {
                     <ProductItem key={index} id={item._id} image={item.image} name={item.name} price={item.price}/>
                 ))
             }
+        </div>
+        <div className='flex justify-center mt-8'>
+            <button type='submit' className='bg-black text-white text-sm px-10 py-4 border rounded-lg hover:bg-white hover:text-black hover:border-black hover:duration-300'>XEM THÊM</button>
         </div>
     </div>
   )

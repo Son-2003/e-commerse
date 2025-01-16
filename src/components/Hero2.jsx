@@ -3,12 +3,13 @@ import {assets} from '../assets/assets'
 import Marquee from 'react-fast-marquee'
 
 const Hero = () => {
-  const items = Array.from({ length: 30 }, (_, index) => "// Mei Ling");
+  const items = Array.from({ length: 30 }, (_, index) => "// Mei Ling ");
 
   return (
     <div>
-      <div className='flex flex-col sm:flex-row '>
-        {/* Hero left side */}
+        <div className='flex flex-col sm:flex-row border-2'>
+        <img className='w-full sm:w-1/2' src={assets.hero_img} alt="" />
+
         <div className='w-full sm:w-1/2 flex items-center justify-center py-10 sm:py-0'>
             <div className='text-[#414141]'>
               <div className='flex items-center gap-2'>
@@ -21,10 +22,7 @@ const Hero = () => {
                 <p className='w-8 md:w-11 h-[2px] bg-[#414141]'></p>
               </div>
             </div>
-        </div>
-
-        {/* Hero right side */}
-        <img className='w-full sm:w-1/2 animate-topToBottom' src={assets.hero_img} alt="" />
+        </div>   
       </div>
       <Marquee gradient={false} speed={50} className='bg-gray-200'>
         <div className='space-x-8 flex'>
@@ -37,7 +35,7 @@ const Hero = () => {
         
       </Marquee>
     </div>
-    
+      
   )
 }
 
