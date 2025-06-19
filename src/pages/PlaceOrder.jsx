@@ -9,9 +9,9 @@ const PlaceOrder = () => {
   const {navigate} = useContext(ShopContext);
  
   return (
-    <div className='flex flex-col sm:flex-row justify-between gap-4 pt-5 sm:pt-14 min-h-[80vh] border-t px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]'>
+    <div className='flex flex-col justify-between gap-4 pt-5 sm:pt-14 min-h-[80vh] border-t px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]'>
       {/* Left Side */}
-      <div className='flex flex-col gap-4 w-full sm:max-w-[480px]'>
+      <div className='flex flex-col mb-10 gap-4 w-full md:w-full'>
         <div className='text-xl sm:text-2xl my-3'>
           <Title text1={"DELIVERY"} text2={"INFORMATION"}/>
         </div>
@@ -33,12 +33,10 @@ const PlaceOrder = () => {
       </div>
 
       {/* Right Side */}
-      <div className='mt-8'>
-        <div className='mt-8 min-w-80'>
-          <CartTotal/>
-        </div>
+      <div className='flex flex-col gap-4 w-full sm:w-full'>
+        <CartTotal/>
 
-        <div className='mt-12'>
+        <div className='mt-2'>
           <Title text1={"PAYMENT"} text2={"METHOD"}/>
           {/* Payment Method Selection */}
           <div className='flex gap-3 flex-col lg:flex-row'>
