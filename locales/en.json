@@ -1,0 +1,19 @@
+{
+  "home": "Home",
+  "favorites": "Favorites",
+  "settings": "Settings",
+  "welcome": "Welcome to My App",
+  "language": "Language",
+  "favorite": "Favorite",
+  "Personal information": "Personal information",
+  "Select Language": "Select Language",
+  "Please choose your language": "Please choose your language",
+  "Confirm": "Confirm",
+  "error.emailNotExist": "Email does not exist.",
+  "error.userInactive": "Your account has been disabled. Please contact support.",
+  "error.incorrectPassword": "Incorrect password. Please try again.",
+  "error.roleNotExist": "The specified role does not exist.",
+  "error.emailAlreadyExist": "An account with this email already exists.",
+  "error.cannotDeletePrimaryLocation": "You cannot delete your primary location.",
+  "error.oldPasswordNotMatch": "The old password is incorrect."
+}
