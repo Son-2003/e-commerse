@@ -14,18 +14,28 @@ const getAllProducts = async (
   sortDir: string,
   request: SearchProductRequest
 ): Promise<ResponseEntityPagination<ProductResponse>> => {
-  const response = await axios.post<ResponseEntityPagination<ProductResponse>>(
-    `${API_BASE_URL}/products/search?pageNo=${pageNo}&pageSize=${pageSize}&sortBy=${sortBy}&sortDir=${sortDir}`,
-    request
-  );
-  return response.data;
+  try {
+    const response = await axios.post<
+      ResponseEntityPagination<ProductResponse>
+    >(
+      `${API_BASE_URL}/products/search?pageNo=${pageNo}&pageSize=${pageSize}&sortBy=${sortBy}&sortDir=${sortDir}`,
+      request
+    );
+    return response.data;
+  } catch (error: any) {
+    throw error;
+  }
 };
 
 const getProduct = async (id: number): Promise<ProductResponse> => {
-  const response = await axios.get<ProductResponse>(
-    `${API_BASE_URL}/products/${id}`
-  );
-  return response.data;
+  try {
+    const response = await axios.get<ProductResponse>(
+      `${API_BASE_URL}/products/${id}`
+    );
+    return response.data;
+  } catch (error: any) {
+    throw error;
+  }
 };
 
 export default {

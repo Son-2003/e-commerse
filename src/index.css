@@ -39,3 +39,16 @@ a.active hr {
     color: white;
   }
 }
+
+@media print {
+  body {
+    zoom: 65%; /* Thu nhỏ toàn bộ nội dung để vừa 1 trang A4 */
+    margin: 0;
+    padding: 0;
+  }
+
+  @page {
+    size: auto; /* hoặc auto */
+    margin: 10mm;
+  }
+}

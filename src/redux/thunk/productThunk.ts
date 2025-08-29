@@ -20,7 +20,7 @@ export const getAllProductsThunk = createAsyncThunk<
       return data;
     } catch (error: any) {
       return thunkAPI.rejectWithValue(
-        error.response.data || "get all products failed"
+        error.response?.data?.message || "get all products failed"
       );
     }
   }
@@ -34,7 +34,7 @@ export const getProductThunk = createAsyncThunk<ProductResponse, number>(
       return data;
     } catch (error: any) {
       return thunkAPI.rejectWithValue(
-        error.response.data || "get product detail failed"
+        error.response?.data?.message || "get product detail failed"
       );
     }
   }

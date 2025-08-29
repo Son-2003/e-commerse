@@ -9,6 +9,7 @@ import {
   changePasswordThunk,
   getInfoThunk,
   logoutUserThunk,
+  refreshTokenThunk,
   signInUserThunk,
   signUpCustomerThunk,
   signUpStaffThunk,
@@ -50,11 +51,16 @@ const authSlice = createSlice({
         state.refreshToken = action.payload.refreshToken;
       }
     },
+    resetAuthError: (state) => {
+      state.errorAuth = null;
+    },
     logout(state) {
       state.accessToken = null;
       state.refreshToken = null;
       state.userInfo = null;
       state.changePasswordSuccess = null;
+      state.loadingAuth = false;
+      state.errorAuth = null;
     },
   },
   extraReducers: (builder) => {
@@ -64,6 +70,7 @@ const authSlice = createSlice({
     getInfo(builder);
     logoutUser(builder);
     changePassword(builder);
+    refreshToken(builder);
   },
 });
 
@@ -83,7 +90,7 @@ function signInUser(builder: ActionReducerMapBuilder<AuthState>) {
     )
     .addCase(signInUserThunk.rejected, (state, action: PayloadAction<any>) => {
       state.loadingAuth = false;
-      state.errorAuth = action.payload.message || "Sign in failed";
+      state.errorAuth = action.payload || "Sign in failed";
     });
 }
 
@@ -191,5 +198,29 @@ function changePassword(builder: ActionReducerMapBuilder<AuthState>) {
     );
 }
 
-export const { logout, setTokens, resetUserAuth } = authSlice.actions;
+function refreshToken(builder: ActionReducerMapBuilder<AuthState>) {
+  builder
+    .addCase(refreshTokenThunk.pending, (state) => {
+      state.loadingAuth = true;
+      state.errorAuth = null;
+    })
+    .addCase(
+      refreshTokenThunk.fulfilled,
+      (state, action: PayloadAction<JWTAuthResponse>) => {
+        state.loadingAuth = false;
+        state.accessToken = action.payload.accessToken || null;
+        state.refreshToken = action.payload.refreshToken || null;
+      }
+    )
+    .addCase(
+      refreshTokenThunk.rejected,
+      (state, action: PayloadAction<any>) => {
+        state.loadingAuth = false;
+        state.errorAuth = action.payload || "Refresh token failed";
+      }
+    );
+}
+
+export const { logout, setTokens, resetUserAuth, resetAuthError } =
+  authSlice.actions;
 export default authSlice.reducer;

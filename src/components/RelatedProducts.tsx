@@ -19,8 +19,8 @@ const RelatedProducts = ({category, subCategory}: RelatedProductsProps) => {
 
         if(products.length > 0) {
             let productRelated = products.slice();
-            productRelated = productRelated.filter((item: any) => category === item.category);
-            productRelated = productRelated.filter((item: any) => subCategory === item.subCategory);
+            productRelated = productRelated.filter((item: ProductResponse) => category === item.category);
+            productRelated = productRelated.filter((item: ProductResponse) => subCategory === item.subCategory);
 
             setRelated(productRelated.slice(0,5))
         }

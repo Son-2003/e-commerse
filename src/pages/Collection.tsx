@@ -5,7 +5,6 @@ import Title from "../components/Title";
 import ProductItem from "../components/ProductItem";
 import { ProductResponse, SearchProductRequest } from "common/models/product";
 import { Pagination, Spin } from "antd";
-import { LoadingOutlined } from "@ant-design/icons";
 import LoadingSpinner from "components/LoadingSpinner";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@redux/store";
@@ -79,7 +78,7 @@ const Collection = () => {
 
   const toggleSort = (sortValue: string) => {
     setSortOption(sortValue);
-    
+
     switch (sortValue) {
       case "low-high":
         setSortBySelected("price");
@@ -102,75 +101,69 @@ const Collection = () => {
   }, [products]);
 
   return (
-    <div className="flex flex-col sm:flex-row gap-1 sm:gap-10 pt-10 border-t px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]">
-      {/* Filter Options */}
+    <div className="flex flex-col sm:flex-row gap-1 sm:gap-10 pt-10 px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]">
+      {/* Filter Sidebar */}
       <div className="min-w-60">
-        <p className="my-2 text-xl flex items-center cursor-pointer gap-2">
-          FILTERS
-          <img className={`h-3`} src={assets.dropdown_icon} alt="" />
-        </p>
-        {/* Category Filter */}
-        <div className={`border border-gray-300 pl-5 py-3 mt-6 sm:block`}>
-          <p className="mb-3 text-sm font-medium">CATEGORIES</p>
-          <div className="flex flex-col gap-2 text-sm font-light text-gray-700">
-            <p className="flex gap-2">
-              <input
-                type="checkbox"
-                className="w-3"
-                onChange={() => toggleCategory(Category.MEN)}
-              />
-              Men
-            </p>
-            <p className="flex gap-2">
-              <input
-                type="checkbox"
-                className="w-3"
-                onChange={() => toggleCategory(Category.WOMEN)}
-              />
-              Women
-            </p>
-            <p className="flex gap-2">
-              <input
-                type="checkbox"
-                className="w-3"
-                onChange={() => toggleCategory(Category.KIDS)}
-              />
-              Kids
-            </p>
-          </div>
-        </div>
+        <div className="rounded-xl pb-5">
+          <h3 className="text-lg font-semibold text-gray-800 flex items-center justify-between cursor-pointer">
+            Filters
+            <img className="h-3" src={assets.dropdown_icon} alt="" />
+          </h3>
 
-        {/* SubCategory Filter */}
-        <div className={`border border-gray-300 pl-5 py-3 mt-6 my-5 sm:block`}>
-          <p className="mb-3 text-sm font-medium">TYPE</p>
-          <div className="flex flex-col gap-2 text-sm font-light text-gray-700">
-            <p className="flex gap-2">
-              <input
-                type="checkbox"
-                className="w-3"
-                value={"Topwear"}
-                onChange={() => toggleSubCategory(SubCategory.TOP)}
-              />
-              Topwear
-            </p>
-            <p className="flex gap-2">
-              <input
-                type="checkbox"
-                className="w-3"
-                value={"Bottomwear"}
-                onChange={() => toggleSubCategory(SubCategory.BOTTOM)}
-              />
-              Bottomwear
-            </p>
-            <p className="flex gap-2">
-              <input
-                type="checkbox"
-                className="w-3"
-                value={"Winterwear"}
-                onChange={() => toggleSubCategory(SubCategory.WINTER)}
-              />
-              Winterwear
-            </p>
+          {/* Category */}
+          <div className="mt-6 border-t border-gray-200 pt-4">
+            <p className="mb-3 text-sm font-medium text-gray-700">Categories</p>
+            <div className="flex flex-col gap-3 text-sm text-gray-600">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  onChange={() => toggleCategory(Category.MEN)}
+                />
+                <span>Men</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  onChange={() => toggleCategory(Category.WOMEN)}
+                />
+                <span>Women</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  onChange={() => toggleCategory(Category.KIDS)}
+                />
+                <span>Kids</span>
+              </label>
+            </div>
+          </div>
+
+          {/* Type */}
+          <div className="mt-6 border-t border-gray-200 pt-4">
+            <p className="mb-3 text-sm font-medium text-gray-700">Type</p>
+            <div className="flex flex-col gap-3 text-sm text-gray-600">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  onChange={() => toggleSubCategory(SubCategory.TOP)}
+                />
+                <span>Topwear</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  onChange={() => toggleSubCategory(SubCategory.BOTTOM)}
+                />
+                <span>Bottomwear</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  onChange={() => toggleSubCategory(SubCategory.WINTER)}
+                />
+                <span>Winterwear</span>
+              </label>
+            </div>
           </div>
         </div>
       </div>
@@ -189,7 +182,7 @@ const Collection = () => {
               <select
                 value={sortOption}
                 onChange={(e) => toggleSort(e.target.value)}
-                className="border-2 border-gray-300 text-sm px-2"
+                className="border border-gray-300 px-3 py-2 text-sm outline-none"
                 name=""
                 id=""
               >

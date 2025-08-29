@@ -1,67 +1,327 @@
-import { useContext, useState } from 'react';
-import { assets } from '../assets/assets';
-import CartTotal from '../components/CartTotal';
-import Title from '../components/Title';
-import { ShopContext } from '../context/ShopContext';
+import { useContext, useEffect, useState } from "react";
+import CartTotal from "../components/CartTotal";
+import Title from "../components/Title";
+import { ShopContext } from "../context/ShopContext";
+import {
+  BankOutlined,
+  CheckCircleFilled,
+  CloseCircleFilled,
+  DollarOutlined,
+  EnvironmentOutlined,
+  PlusOutlined,
+} from "@ant-design/icons";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@redux/store";
+import {
+  formatPhone,
+  isValidEmail,
+  isValidPhone,
+  unFormatPhone,
+} from "../utils/FormatPhone";
+import { fetchAddressSuggestions } from "../utils/GoongLocation";
+import { addOrderThunk } from "@redux/thunk/orderThunk";
+import LoadingSpinner from "components/LoadingSpinner";
+import { PaymentType } from "common/enums/PaymentType";
+import { Suggestion } from "common/models/location";
+import { formatAddressPart } from "../utils/FormatAddressPart";
 
 const PlaceOrder = () => {
-  const [method, setMethod] = useState("");
-  const {navigate} = useContext(ShopContext);
- 
+  const { cartItems, clearCart } = useContext(ShopContext);
+  const [method, setMethod] = useState<PaymentType>(PaymentType.NONE);
+  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const { navigate } = useContext(ShopContext);
+  const dispatch = useDispatch<AppDispatch>();
+  const { userInfo } = useSelector((state: RootState) => state.auth);
+  const { loadingOrder } = useSelector((state: RootState) => state.order);
+  const [addressSelected, setAddressSelected] = useState<Suggestion>();
+  const [form, setForm] = useState({
+    fullname: userInfo?.fullName ?? "",
+    phone: userInfo?.phone ?? "",
+    address: formatAddressPart(userInfo?.address) ?? "",
+    email: userInfo?.email ?? "",
+  });
+
+  const handleChange = async (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    if (name === "phone") {
+      setForm({ ...form, phone: formatPhone(value) });
+    } else if (name === "address") {
+      setForm({ ...form, address: value });
+
+      if (value.length > 2) {
+        try {
+          const results = await fetchAddressSuggestions(value);
+          setSuggestions(results || []);
+        } catch (err) {
+          setSuggestions([]);
+        }
+      } else {
+        setSuggestions([]);
+      }
+    } else {
+      setForm({ ...form, [name]: value });
+    }
+  };
+
+  const handlePlaceOrder = async () => {
+    try {
+      const res = await dispatch(
+        addOrderThunk({
+          cartItems: cartItems,
+          address:
+            (addressSelected?.structured_formatting?.main_text ?? "") +
+            "//" +
+            (addressSelected?.structured_formatting?.secondary_text ?? ""),
+          fullName: form.fullname,
+          email: form.email,
+          phone: unFormatPhone(form.phone),
+          type: method,
+        })
+      ).unwrap();
+      if (res) {
+        clearCart();
+        localStorage.removeItem("cart");
+        navigate("/success");
+      }
+    } catch (error) {
+      console.error("Failed to update user info:", error);
+    }
+  };
+
+  const isValid =
+    !form.address?.toString().length ||
+    !form.fullname?.length ||
+    !form.phone?.length ||
+    !form.email.length ||
+    !isValidPhone(form.phone)||
+    method === PaymentType.NONE;
+
   return (
-    <div className='flex flex-col justify-between gap-4 pt-5 sm:pt-14 min-h-[80vh] border-t px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]'>
+    <div className="flex flex-col sm:flex-row justify-between gap-4 pt-5 sm:pt-14 min-h-[80vh] border-t px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]">
       {/* Left Side */}
-      <div className='flex flex-col mb-10 gap-4 w-full md:w-full'>
-        <div className='text-xl sm:text-2xl my-3'>
-          <Title text1={"DELIVERY"} text2={"INFORMATION"}/>
+      <div className="flex-1 bg-white rounded-2xl p-6 space-y-4">
+        <div className="text-xl sm:text-2xl font-semibold text-gray-800">
+          <Title text1="DELIVERY" text2="INFORMATION" />
         </div>
-        <div className='flex gap-3'>
-          <input className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='First name'/>
-          <input className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='Last name'/>
-        </div>
-        <input className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='Email address'/>
-        <input className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='Street'/>
-        <div className='flex gap-3'>
-          <input className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='City'/>
-          <input className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='State'/>
-        </div>
-        <div className='flex gap-3'>
-          <input className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='Zipcode'/>
-          <input className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='Country'/>
-        </div>
-        <input className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='Phone'/>
-      </div>
 
-      {/* Right Side */}
-      <div className='flex flex-col gap-4 w-full sm:w-full'>
-        <CartTotal/>
-
-        <div className='mt-2'>
-          <Title text1={"PAYMENT"} text2={"METHOD"}/>
-          {/* Payment Method Selection */}
-          <div className='flex gap-3 flex-col lg:flex-row'>
-            <div onClick={() => setMethod("stripe")} className="flex items-center gap-3 border p-2 px-3 cursor-pointer">
-              <p className={`min-w-3.5 h-3.5 border rounded ${method == 'stripe' ? "bg-green-400" : ""}`}></p>
-              <img className='h-5 mx-4' src={assets.stripe_logo} alt="" />
-            </div>
-            <div onClick={() => setMethod("razorpay")} className='flex items-center gap-3 border p-2 px-3 cursor-pointer'>
-              <p className={`min-w-3.5 h-3.5 border rounded ${method == 'razorpay' ? "bg-green-400" : ""}`}></p>
-              <img className='h-5 mx-4' src={assets.razorpay_logo} alt="" />
-            </div>
-            <div onClick={() => setMethod("cod")} className='flex items-center gap-3 border p-2 px-3 cursor-pointer'>
-              <p className={`min-w-3.5 h-3.5 border rounded ${method == 'cod' ? "bg-green-400" : ""}`}></p>
-              <p className='text-gray-500 text-sm font-medium mx-4'>CASH ON DELIVERY</p>
-            </div>
+        <div className="w-full">
+          <label className="block text-sm font-medium mb-1">Full name</label>
+          <div className="relative">
+            <input
+              name="fullname"
+              value={form.fullname}
+              onChange={handleChange}
+              className="border border-gray-300 rounded-xl py-3 px-4 w-full outline-none"
+              type="text"
+              placeholder="Full name"
+            />
+            {form.fullname?.length > 0 && (
+              <span className="absolute right-3 top-1/2 -translate-y-1/2">
+                {!form.fullname?.length ? (
+                  <CloseCircleFilled className="text-red-600" />
+                ) : (
+                  <CheckCircleFilled className="text-green-600" />
+                )}
+              </span>
+            )}
           </div>
         </div>
 
-        <div className='w-full text-end mt-8'>
-          <button onClick={() => navigate('/order')} className='bg-black text-white px-16 py-3 text-sm'>PLACE ORDER</button>
+        <div className="w-full">
+          <label className="block text-sm font-medium mb-1">Email</label>
+          <div className="relative">
+            <input
+              name="email"
+              onChange={handleChange}
+              value={form.email}
+              className="border border-gray-300 rounded-xl py-3 px-4 w-full outline-none"
+              type="email"
+              placeholder="Email address"
+            />
+            {form.email?.length > 0 && (
+              <span className="absolute right-3 top-1/2 -translate-y-1/2">
+                {!form.email?.length || !isValidEmail(form.email) ? (
+                  <CloseCircleFilled className="text-red-600" />
+                ) : (
+                  <CheckCircleFilled className="text-green-600" />
+                )}
+              </span>
+            )}
+          </div>
         </div>
 
+        <div className="relative">
+          <label className="block text-sm font-medium mb-1">Address</label>
+          <div className="relative">
+            <input
+              name="address"
+              onChange={handleChange}
+              value={form.address}
+              className="border border-gray-300 rounded-xl py-3 px-4 w-full outline-none"
+              type="text"
+              placeholder="Address"
+            />
+            {form.address?.length > 0 && (
+              <span className="absolute right-3 top-1/2 -translate-y-1/2">
+                {!form.address.length ? (
+                  <CloseCircleFilled className="text-red-600" />
+                ) : (
+                  <CheckCircleFilled className="text-green-600" />
+                )}
+              </span>
+            )}
+          </div>
+          {form.address?.length > 2 && suggestions.length > 0 && (
+            <ul className="absolute left-0 right-0 z-50 bg-white border rounded-lg shadow mt-1 max-h-40 overflow-y-auto">
+              {suggestions.map((item, idx) => (
+                <li
+                  key={idx}
+                  onClick={() => {
+                    setForm({
+                      ...form,
+                      address:
+                        (item.structured_formatting?.main_text ?? "") +
+                        ", " +
+                        (item.structured_formatting?.secondary_text ?? ""),
+                    });
+                    setAddressSelected(item);
+                    setSuggestions([]);
+                  }}
+                  className="px-4 py-3 hover:bg-gray-50 cursor-pointer text-sm flex items-center gap-3 transition-colors"
+                >
+                  <EnvironmentOutlined className="text-black mt-1" />
+                  <div className="flex flex-col">
+                    <span className="font-medium text-gray-800 line-clamp-1">
+                      {item.structured_formatting?.main_text ??
+                        item.description}
+                    </span>
+                    <span className="text-gray-500 text-xs line-clamp-1">
+                      {item.structured_formatting?.secondary_text ?? ""}
+                    </span>
+                  </div>
+                </li>
+              ))}
+
+              <li
+                onClick={() => {
+                  setForm({ ...form, address: form.address });
+                  setSuggestions([]);
+                }}
+                className="px-4 py-3 bg-blue-50 hover:bg-blue-100 cursor-pointer text-sm text-blue-700 font-medium flex flex-col gap-1 rounded-b-xl"
+              >
+                <div className="items-center">
+                  <div className="flex gap-2">
+                    <PlusOutlined />
+                    <span>Use the address you entered:</span>
+                  </div>
+
+                  <span className="italic break-words whitespace-normal">
+                    {form.address}
+                  </span>
+                </div>
+              </li>
+            </ul>
+          )}
+        </div>
+
+        <div className="w-full">
+          <label className="block text-sm font-medium mb-1">Phone</label>
+          <div className="relative">
+            <input
+              name="phone"
+              value={form.phone}
+              onChange={handleChange}
+              className="border border-gray-300 rounded-xl py-3 px-4 w-full outline-none"
+              type="text"
+              placeholder="Phone"
+            />
+            {form.phone?.length > 0 && (
+              <span className="absolute right-3 top-1/2 -translate-y-1/2">
+                {!isValidPhone(form.phone) ? (
+                  <CloseCircleFilled className="text-red-600" />
+                ) : (
+                  <CheckCircleFilled className="text-green-600" />
+                )}
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Right Side */}
+      <div className="flex-1 flex flex-col gap-6">
+        <div className="bg-white rounded-2xl p-6">
+          <CartTotal />
+        </div>
+
+        <div className="bg-white rounded-2xl p-6">
+          <div className="text-xl sm:text-2xl font-semibold text-gray-800 mb-4">
+            <Title text1="PAYMENT" text2="METHOD" />
+          </div>
+
+          <div className="flex flex-col gap-4">
+            {/* BANK */}
+            <div
+              onClick={() => setMethod(PaymentType.BANK)}
+              className={`flex items-center gap-3 border rounded-xl p-4 cursor-pointer transition ${
+                method === PaymentType.BANK
+                  ? "border-green-500 bg-green-50"
+                  : "border-gray-200 hover:border-black"
+              }`}
+            >
+              <div
+                className={`w-4 h-4 rounded-full border flex items-center justify-center ${
+                  method === PaymentType.BANK
+                    ? "border-green-500 bg-green-500"
+                    : "border-gray-300"
+                }`}
+              />
+              <BankOutlined className="text-xl text-gray-700" />
+              <p className="text-gray-700 font-medium ml-2">Bank Transfer</p>
+            </div>
+
+            {/* COD */}
+            <div
+              onClick={() => setMethod(PaymentType.CASH)}
+              className={`flex items-center gap-3 border rounded-xl p-4 cursor-pointer transition ${
+                method === PaymentType.CASH
+                  ? "border-green-500 bg-green-50"
+                  : "border-gray-200 hover:border-black"
+              }`}
+            >
+              <div
+                className={`w-4 h-4 rounded-full border flex items-center justify-center ${
+                  method === PaymentType.CASH
+                    ? "border-green-500 bg-green-500"
+                    : "border-gray-300"
+                }`}
+              />
+              <DollarOutlined className="text-xl text-gray-700" />
+              <p className="text-gray-700 font-medium ml-2">Cash on Delivery</p>
+            </div>
+          </div>
+
+        </div>
+
+        <div className="w-full text-end">
+          <button
+            disabled={loadingOrder || isValid}
+            onClick={() => handlePlaceOrder()}
+            className={`bg-black text-white px-10 py-3 rounded-sm font-medium text-sm shadow-md hover:opacity-90 transition
+            ${isValid ? "bg-gray-500" : "bg-black hover:opacity-90"}`}
+          >
+            {loadingOrder ? (
+              <LoadingSpinner size="small" color="white" />
+            ) : (
+              "PLACE ORDER"
+            )}
+          </button>
+        </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default PlaceOrder
+export default PlaceOrder;

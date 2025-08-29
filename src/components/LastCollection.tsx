@@ -50,7 +50,7 @@ const LastCollection = () => {
             <button
               onClick={handleClick}
               type="submit"
-              className="bg-black text-white text-sm px-10 py-4 border rounded-lg hover:bg-white hover:text-black hover:border-black hover:duration-300"
+              className="bg-black rounded-sm text-white text-sm px-10 py-4 border hover:bg-white hover:text-black hover:border-black hover:duration-300"
             >
               More
             </button>

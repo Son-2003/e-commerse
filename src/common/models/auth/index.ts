@@ -20,4 +20,5 @@ export interface SignUpRequest {
   password: string;
   fullName: string;
   phone: string;
+  image: string;
 }

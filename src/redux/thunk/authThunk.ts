@@ -16,7 +16,7 @@ export const signInUserThunk = createAsyncThunk<
       const data = await AuthService.signInUser(credentials);      
       return data;
     } catch (error: any) {
-      return thunkAPI.rejectWithValue(error.response.data || "Sign in failed");
+      return thunkAPI.rejectWithValue(error.response?.data?.message || "Sign in failed");
     }
   }
 );
@@ -29,7 +29,7 @@ export const signUpCustomerThunk = createAsyncThunk<JWTAuthResponse, SignUpReque
       const data = await AuthService.signUpCustomer(credentials);
       return data;
     } catch (error: any) {
-      return thunkAPI.rejectWithValue(error.response.data || "Sign up customer failed");
+      return thunkAPI.rejectWithValue(error.response?.data?.message || "Sign up customer failed");
     }
   }
 );
@@ -42,7 +42,7 @@ export const signUpStaffThunk = createAsyncThunk<JWTAuthResponse, SignUpRequest>
       const data = await AuthService.signUpStaff(credentials);
       return data;
     } catch (error: any) {
-      return thunkAPI.rejectWithValue(error.response.data || "Sign up staff failed");
+      return thunkAPI.rejectWithValue(error.response?.data?.message || "Sign up staff failed");
     }
   }
 );
@@ -73,15 +73,27 @@ export const logoutUserThunk = createAsyncThunk<
   { state: RootState }
 >("auth/logoutUser", async (_, thunkAPI) => {
   const state = thunkAPI.getState();
-  const accessToken = state.auth.accessToken;
+  const accessToken = state.auth.accessToken;  
   if (!accessToken) {
-    return thunkAPI.rejectWithValue("No access token available");
+    return thunkAPI.rejectWithValue("No access token available log out");
   }
   try {
     await AuthService.logout(accessToken);
   } catch (error: any) {
     return thunkAPI.rejectWithValue(error.response?.data || "Logout failed");
   }
+});
+
+export const refreshTokenThunk = createAsyncThunk<
+  JWTAuthResponse,
+  string
+>("auth/refreshToken", async (credentials, thunkAPI) => {
+  try {
+      const data = await AuthService.refreshToken(credentials);      
+      return data;
+    } catch (error: any) {
+      return thunkAPI.rejectWithValue(error.response?.data?.message || "Refresh token failed");
+    }
 });
 
 export const changePasswordThunk = createAsyncThunk<

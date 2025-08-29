@@ -5,28 +5,22 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "redux/store";
 import { getAllProductsThunk } from "@redux/thunk/productThunk";
 import { EntityStatus } from "common/enums/EntityStatus";
-
-type CartItem = {
-  id: number;
-  name: string;
-  quantity: number;
-  price: number;
-  image: string;
-  size: string;
-};
+import { CartItem } from "common/models/order";
 
 interface ShopContextType {
   currency: string;
   delivery_fee: number;
   search: string;
   setSearch: (value: string) => void;
-   currentState: string;
+  currentState: string;
   setCurrentState: (value: string) => void;
   showSearch: boolean;
   setShowSearch: (value: boolean) => void;
   cartItems: CartItem[];
   addToCart: (item: CartItem) => void;
-  removeFromCart: (id: number, size: string) => void;
+  decrementFromCart: (item: CartItem) => void;
+  removeFromCart: (item: CartItem) => void;
+  clearCart: () => void;
   getCartCount: () => number;
   getCartAmount: () => number;
   navigate: ReturnType<typeof useNavigate>;
@@ -41,8 +35,8 @@ interface ShopContextProviderProps {
 }
 
 const ShopContextProvider = ({ children }: ShopContextProviderProps) => {
-  const currency = "$";
-  const delivery_fee = 10.0;
+  const currency = " VND";
+  const delivery_fee = 10;
   const [search, setSearch] = useState<string>("");
   const [currentState, setCurrentState] = useState<string>("Sign In");
   const [showSearch, setShowSearch] = useState<boolean>(false);
@@ -85,7 +79,7 @@ const ShopContextProvider = ({ children }: ShopContextProviderProps) => {
 
       if (existingIndex !== -1) {
         const updatedCart = [...prevCart];
-        updatedCart[existingIndex].quantity += item.quantity;
+        updatedCart[existingIndex].quantity = item.quantity + 1;
         return updatedCart;
       }
 
@@ -97,12 +91,31 @@ const ShopContextProvider = ({ children }: ShopContextProviderProps) => {
     return cartItems.length;
   };
 
-  const removeFromCart = (id: number, size?: string) => {
+  const decrementFromCart = (item: CartItem) => {
+    setCartItems((prevCart) => {
+      const existingIndex = prevCart.findIndex(
+        (p) => p.id === item.id && p.size === item.size
+      );
+
+      if (existingIndex !== -1) {
+        const updatedCart = [...prevCart];
+        updatedCart[existingIndex].quantity = item.quantity - 1;
+      }
+
+      return [...prevCart];
+    });
+  };
+
+  const removeFromCart = (item: CartItem) => {
     setCartItems((prevCart) =>
       prevCart.filter(
-        (item) => !(item.id === id && (size ? item.size === size : true))
+        (i) => !(i.id === item.id && (item.size ? i.size === item.size : true))
       )
     );
+  };
+
+  const clearCart = () => {
+    setCartItems([]);
   };
 
   const getCartAmount = (): number => {
@@ -123,7 +136,9 @@ const ShopContextProvider = ({ children }: ShopContextProviderProps) => {
     cartItems,
     addToCart,
     getCartCount,
+    decrementFromCart,
     removeFromCart,
+    clearCart,
     getCartAmount,
     navigate,
     products: products.content,

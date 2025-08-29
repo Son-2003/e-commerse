@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { ShopContext } from "../context/ShopContext";
 import { assets } from "../assets/assets";
@@ -6,6 +6,9 @@ import RelatedProducts from "../components/RelatedProducts";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@redux/store";
 import { getProductThunk } from "@redux/thunk/productThunk";
+import { MinusOutlined, PlusOutlined } from "@ant-design/icons";
+import { formatPrice } from "../utils/FormatPrice";
+import ZoomImage from "components/ZoomImage";
 
 const Product = () => {
   const { productId } = useParams();
@@ -14,7 +17,9 @@ const Product = () => {
   const { currency, addToCart } = useContext(ShopContext);
   const [image, setImage] = useState<string>("");
   const [size, setSize] = useState<string>("");
+  const [quantity, setQuantity] = useState<number>(1);
   const [error, setError] = useState<string>("");
+  const [showSuccess, setShowSuccess] = useState(false);
 
   useEffect(() => {
     dispatch(getProductThunk(Number(productId)));
@@ -28,16 +33,21 @@ const Product = () => {
 
   const handleAddToCart = () => {
     if (size === "") {
-      setError("Vui lòng chọn size");
+      setError("Please select size first");
     } else {
       addToCart({
         id: productDetail?.id,
         name: productDetail?.name,
-        quantity: 1,
+        quantity: quantity,
         price: productDetail?.price,
         image: productDetail?.image.split(",")[0],
         size: size,
       });
+      setShowSuccess(true);
+
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 2000);
     }
   };
 
@@ -68,9 +78,7 @@ const Product = () => {
             ))}
           </div>
 
-          <div className="w-full sm:w-[80%]">
-            <img src={image} alt="" className="w-full h-auto" />
-          </div>
+          <ZoomImage image={image} />
         </div>
 
         {/* Product Info */}
@@ -85,8 +93,8 @@ const Product = () => {
             <p className="pl-2">(122)</p>
           </div>
           <p className="mt-5 text-3xl font-medium">
+            {formatPrice(productDetail.price)}
             {currency}
-            {productDetail.price}
           </p>
           <p className="mt-5 text-gray-500 md:w-4/5">
             {productDetail.description}
@@ -98,8 +106,8 @@ const Product = () => {
               {productDetail.sizes.map((item, index) => (
                 <button
                   onClick={() => handleSelectSize(item.name)}
-                  className={`border py-2 px-4 mb-3 bg-gray-100 ${
-                    item.name === size ? "border-orange-500" : ""
+                  className={`border py-2 px-4 mb-3 rounded-sm bg-gray-100 ${
+                    item.name === size ? "border-gray-500" : ""
                   }`}
                   key={index}
                 >
@@ -110,12 +118,53 @@ const Product = () => {
             </div>
           </div>
 
-          <button
-            className={`bg-black text-white active:bg-gray-700 px-8 py-3 text-sm`}
-            onClick={() => handleAddToCart()}
-          >
-            ADD TO CART
-          </button>
+          <div className="flex gap-2">
+            <div className="flex items-center gap-1 bg-gray-100 rounded-sm p-1 border border-gray-200 ">
+              <button
+                onClick={() => setQuantity(quantity - 1)}
+                className="w-8 h-8 rounded-sm flex items-center justify-center text-gray-500 hover:text-black transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={quantity <= 1}
+              >
+                <MinusOutlined className="text-xs" />
+              </button>
+
+              <div className="w-12 h-8 flex items-center justify-center">
+                <input
+                  type="text"
+                  min="1"
+                  value={quantity}
+                  onChange={(e) => {
+                    const newQuantity = parseInt(e.target.value);
+                    if (!isNaN(newQuantity) && newQuantity >= 1) {
+                      setQuantity(newQuantity);
+                    } else if (e.target.value === "") {
+                      setQuantity(1);
+                    }
+                  }}
+                  className="w-full h-full text-center text-sm font-semibold bg-transparent border-none outline-none"
+                />
+              </div>
+
+              <button
+                onClick={() => setQuantity(quantity + 1)}
+                className="w-8 h-8 rounded-sm flex items-center justify-center text-gray-500 hover:text-black transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <PlusOutlined className="text-xs" />
+              </button>
+            </div>
+            <button
+              className={`rounded-sm px-8 py-3 text-sm font-medium transition-all duration-300 ${
+                showSuccess
+                  ? "bg-green-500 text-white"
+                  : "bg-black text-white hover:bg-gray-800 active:bg-gray-700"
+              }`}
+              onClick={() => handleAddToCart()}
+              disabled={showSuccess}
+            >
+              {showSuccess ? "✓ ADDED" : "ADD TO CART"}
+            </button>
+          </div>
+
           <hr className="mt-8 sm:w-4/5" />
           <div className="text-sm text-gray-500 mt-5 flex flex-col gap-1">
             <p>100% Original product.</p>

@@ -1,151 +1,224 @@
-import { useCallback, useContext, useEffect, useState } from "react";
-import Title from "../components/Title";
-import { Link, useNavigate } from "react-router-dom";
-import { ShopContext } from "../context/ShopContext";
+import { useCallback, useContext, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@redux/store";
-import { getInfoThunk, signInUserThunk } from "@redux/thunk/authThunk";
-import { useTranslation } from "react-i18next";
+import {
+  getInfoThunk,
+  signInUserThunk,
+  signUpCustomerThunk,
+} from "@redux/thunk/authThunk";
+import { resetAuthError } from "@redux/slices/authSlice";
+import { ShopContext } from "../context/ShopContext";
+import { CheckCircleOutlined } from "@ant-design/icons";
+import Title from "components/Title";
+import LoadingSpinner from "components/LoadingSpinner";
+import { AVA_DEFAULT } from "common/constant";
 
 const Login = () => {
   const { currentState, setCurrentState } = useContext(ShopContext);
-  let current = currentState.split(" ");
+  const isSignIn = currentState === "Sign In";
+
+  const [name, setName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-  const [error, setError] = useState<string>("");
-  const { t } = useTranslation();
+
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
-  const { accessToken, refreshToken, errorAuth } = useSelector(
+  const { errorAuth, loadingAuth } = useSelector(
     (state: RootState) => state.auth
   );
 
-  const handleSignIn = useCallback(async () => {
-    const trimmedEmail = email.trim();
-    const trimmedPassword = password.trim();
+  const isLengthValid = password.length >= 8 && password.length <= 20;
+  const hasUpperCase = /[A-Z]/.test(password);
+  const hasDigit = /\d/.test(password);
+  const hasSpecialChar = /[!@#$%^&*()_\-]/.test(password);
+  const isPasswordValid =
+    isLengthValid && hasUpperCase && hasDigit && hasSpecialChar;
 
-    if (!trimmedEmail || !trimmedPassword) {
-      setError("Please enter both your email and password to continue.");
-      return;
-    }
-
+  const handleAuth = useCallback(async () => {
     try {
-      await dispatch(
-        signInUserThunk({
-          emailOrPhone: trimmedEmail,
-          password: trimmedPassword,
-        })
-      ).unwrap();
-    } catch (err: any) {
-      setError(err?.message ? t(err.message) : "Something went wrong");
-      return;
-    }
-  }, [dispatch, email, password]);
-
-  useEffect(() => {
-    if (accessToken) {
-      localStorage.setItem("ACCESS_TOKEN", accessToken);
-      if (refreshToken) {
-        localStorage.setItem("REFRESH_TOKEN", refreshToken);
+      let tokens;
+      if (isSignIn) {
+        tokens = await dispatch(
+          signInUserThunk({
+            emailOrPhone: email.trim(),
+            password: password.trim(),
+          })
+        ).unwrap();
+      } else {
+        tokens = await dispatch(
+          signUpCustomerThunk({
+            fullName: name.trim(),
+            email: email.trim(),
+            password: password.trim(),
+            phone: "",
+            image: AVA_DEFAULT,
+          })
+        ).unwrap();
       }
-      dispatch(getInfoThunk());
+
+      if (tokens?.refreshToken) {
+        localStorage.setItem("REFRESH_TOKEN", tokens.refreshToken);
+      }
+
+      await dispatch(getInfoThunk());
       navigate("/");
+    } catch (err: any) {
+      console.error(err);
     }
-  }, [accessToken, refreshToken]);
+  }, [dispatch, name, email, password, isSignIn, navigate]);
 
   return (
-    <div className="flex flex-col items-center w-[90%] sm:max-w-96 m-auto mt-14 gap-4 text-gray-800">
-      <div className="inline-flex items-center gap-2 mb-2 mt-10">
-        <p className="text-3xl">
-          <Title text1={current[0]} text2={current[1]} />
+    <div className="flex flex-col items-center w-[90%] rounded-sm m-auto mt-14 gap-4 text-gray-800">
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleAuth();
+        }}
+        className="w-full max-w-md bg-white  p-8 flex flex-col gap-6 border border-gray-200"
+      >
+        {/* Title */}
+        <h2 className="text-3xl font-semibold text-center text-gray-800">
+          {isSignIn ? (
+            <Title text1={"Welcome"} text2={"back"} />
+          ) : (
+            <Title text1={"Create"} text2={"account"} />
+          )}
+        </h2>
+        <p className="text-center text-gray-500 text-sm">
+          {isSignIn ? "Sign in to continue" : "Sign up to get started with us"}
         </p>
-      </div>
-      {error && (
-        <div className="flex items-center gap-2 border border-red-300 bg-red-100 text-red-800 px-3 py-2 text-sm w-full">
-          <span>❌</span>
-          <span>{errorAuth}</span>
+
+        {errorAuth && (
+          <div className="flex items-center gap-2 border border-red-300 bg-red-100 text-red-700 px-3 py-2 text-sm rounded-lg">
+            <span>❌</span>
+            <span>{errorAuth}</span>
+          </div>
+        )}
+
+        {!isSignIn && (
+          <div>
+            <input
+              type="text"
+              placeholder="Full Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full px-4 py-3 border rounded-sm outline-none"
+            />
+          </div>
+        )}
+
+        <div>
+          <input
+            type="email"
+            placeholder="Email Address"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full px-4 py-3 border rounded-sm outline-none"
+          />
         </div>
-      )}
 
-      {currentState === "Sign In" ? (
-        ""
-      ) : (
-        <input
-          placeholder="Name"
-          type="text"
-          className="w-full px-3 py-2 border border-gray-800"
-        />
-      )}
+        <div>
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full px-4 py-3 border rounded-sm outline-none"
+          />
+        </div>
 
-      <div className="w-full">
-        <input
-          placeholder="Email"
-          type="email"
-          className={`w-full px-3 py-2 border border-gray-800 ${
-            email.length === 0 ? "border-red-500 outline-none" : ""
-          }`}
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        {email.length === 0 && (
-          <span className="text-red-500 text-sm">Please input your email.</span>
+        {!isSignIn && (
+          <div className="text-sm text-gray-600 space-y-2">
+            <div className="flex items-center gap-2">
+              <CheckCircleOutlined
+                className={`${
+                  isLengthValid ? "text-teal-500" : "text-gray-400"
+                }`}
+              />
+              <span>Password must be 8–20 characters</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircleOutlined
+                className={`${
+                  hasUpperCase && hasDigit ? "text-teal-500" : "text-gray-400"
+                }`}
+              />
+              <span>Include uppercase letters and numbers</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircleOutlined
+                className={`${
+                  hasSpecialChar ? "text-teal-500" : "text-gray-400"
+                }`}
+              />
+              <span>At least one special character</span>
+            </div>
+          </div>
         )}
-      </div>
 
-      <div className="w-full">
-        <input
-          placeholder="Password"
-          type="password"
-          className={`w-full px-3 py-2 border border-gray-800 ${
-            password.length === 0
-              ? "border-red-500 outline-none focus:border-2"
-              : ""
-          }`}
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        {password.length === 0 && (
-          <span className="text-red-500 text-sm">
-            Please input your password.
-          </span>
-        )}
-      </div>
-
-      <div className="w-full flex justify-between text-sm mt-[-8px]">
-        <p className="cursor-pointer">Forgot your password?</p>
-        {currentState === "Sign In" ? (
-          <p
-            onClick={() => setCurrentState("Sign Up")}
-            className="cursor-pointer"
-          >
-            Create account
-          </p>
-        ) : (
-          <p
-            onClick={() => setCurrentState("Sign In")}
-            className="cursor-pointer"
-          >
-            Sign in here
-          </p>
-        )}
-      </div>
-      <div>
-        <p>{errorAuth || error}</p>
-      </div>
-      <div className="flex justify-center">
+        {/* Action buttons */}
         <button
-          disabled={email.length === 0 || password.length === 0}
-          onClick={handleSignIn}
-          type="button"
-          className={`bg-black text-white text-sm px-10 py-4 border rounded-lg hover:bg-white hover:text-black hover:border-black hover:duration-300 ${
-            email.length === 0 || password.length === 0
-              ? "cursor-not-allowed"
-              : ""
+          type="submit"
+          disabled={
+            email.trim().length === 0 ||
+            password.trim().length === 0 ||
+            (!isSignIn && !isPasswordValid) ||
+            loadingAuth
+          }
+          className={`w-full py-3 rounded-sm font-medium transition ${
+            email.trim().length === 0 ||
+            password.trim().length === 0 ||
+            (!isSignIn && !isPasswordValid)
+              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+              : "bg-black text-white hover:bg-gray-800"
           }`}
         >
-          {currentState}
+          {loadingAuth ? (
+            <LoadingSpinner size="small" color="white" />
+          ) : isSignIn ? (
+            "Sign In"
+          ) : (
+            "Sign Up"
+          )}
         </button>
-      </div>
+
+        {/* Switch Form */}
+        <p className="text-center text-sm text-gray-500">
+          {isSignIn ? (
+            <>
+              Don’t have an account?{" "}
+              <span
+                onClick={() => {
+                  setCurrentState("Sign Up");
+                  setEmail("");
+                  setPassword("");
+                  dispatch(resetAuthError());
+                }}
+                className="text-black font-medium cursor-pointer hover:underline"
+              >
+                Sign Up
+              </span>
+            </>
+          ) : (
+            <>
+              Already have an account?{" "}
+              <span
+                onClick={() => {
+                  setCurrentState("Sign In");
+                  setEmail("");
+                  setPassword("");
+                  setName("");
+                  dispatch(resetAuthError());
+                }}
+                className="text-black font-medium cursor-pointer hover:underline"
+              >
+                Sign In
+              </span>
+            </>
+          )}
+        </p>
+      </form>
     </div>
   );
 };

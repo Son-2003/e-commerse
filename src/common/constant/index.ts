@@ -1,0 +1,2 @@
+const PHONE_REGEX = /^(0[3|5|7|8|9][0-9]{8}|(\+84)[3|5|7|8|9][0-9]{8})$/;
+export const AVA_DEFAULT = "https://res.cloudinary.com/dpysbryyk/image/upload/v1755937565/E-commerse/avatars/xckzvvtk8jpkwqcjal6c.webp"
