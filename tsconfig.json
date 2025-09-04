@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "target": "es2016",
-    "lib": ["dom", "es2016"],
+    "target": "es2017",
+    "lib": ["dom", "es2017"],
     "module": "ESNext",
     "jsx": "react-jsx",
     "baseUrl": "src",

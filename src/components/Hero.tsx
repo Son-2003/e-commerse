@@ -2,7 +2,6 @@ import { assets } from "../assets/assets";
 import Marquee from "react-fast-marquee";
 
 const Hero = () => {
-  const items = Array.from({ length: 30 }, (_, index) => "// FOREVER");
 
   return (
     <div>
@@ -33,18 +32,7 @@ const Hero = () => {
           alt=""
         />
       </div>
-      <Marquee gradient={false} speed={50} className="bg-gray-200">
-        <div className="space-x-8 flex">
-          {items.map((item, index) => (
-            <p
-              key={index}
-              className="text-lg font-light tracking-[0.3em] font-gallisia"
-            >
-              {item}&nbsp;
-            </p>
-          ))}
-        </div>
-      </Marquee>
+      
     </div>
   );
 };
