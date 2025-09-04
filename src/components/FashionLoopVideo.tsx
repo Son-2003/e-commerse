@@ -1,4 +1,5 @@
 import Marquee from "react-fast-marquee";
+import fashionVideo from "../assets/videos/fashion.mp4";
 
 const FashionLoopVideo = () => {
   const items = Array.from({ length: 30 }, () => "// FOREVER");
@@ -7,7 +8,7 @@ const FashionLoopVideo = () => {
     <section className="relative w-full h-screen overflow-hidden">
       {/* Background Video */}
       <video
-        src="/src/assets/videos/fashion.mp4"
+        src={fashionVideo}
         autoPlay
         loop
         muted
