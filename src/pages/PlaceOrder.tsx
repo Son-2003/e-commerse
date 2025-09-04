@@ -24,6 +24,9 @@ import LoadingSpinner from "components/LoadingSpinner";
 import { PaymentType } from "common/enums/PaymentType";
 import { Suggestion } from "common/models/location";
 import { formatAddressPart } from "../utils/FormatAddressPart";
+import { createPaymentLinkThunk } from "@redux/thunk/paymentThunk";
+import { setOrderAddedSuccess } from "@redux/slices/orderSlice";
+import { OrderResponse } from "common/models/order";
 
 const PlaceOrder = () => {
   const { cartItems, clearCart } = useContext(ShopContext);
@@ -33,13 +36,27 @@ const PlaceOrder = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { userInfo } = useSelector((state: RootState) => state.auth);
   const { loadingOrder } = useSelector((state: RootState) => state.order);
-  const [addressSelected, setAddressSelected] = useState<Suggestion>();
+  const { loadingPayment } = useSelector((state: RootState) => state.payment);
+  const [addressSelected, setAddressSelected] = useState<Suggestion | null>(
+    null
+  );
   const [form, setForm] = useState({
-    fullname: userInfo?.fullName ?? "",
-    phone: userInfo?.phone ?? "",
-    address: formatAddressPart(userInfo?.address) ?? "",
-    email: userInfo?.email ?? "",
+    fullname: "",
+    phone: "",
+    address: "",
+    email: "",
   });
+
+  useEffect(() => {
+    if (userInfo) {
+      setForm({
+        fullname: userInfo.fullName ?? "",
+        phone: userInfo.phone ?? "",
+        address: formatAddressPart(userInfo.address) ?? "",
+        email: userInfo.email ?? "",
+      });
+    }
+  }, [userInfo]);
 
   const handleChange = async (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -67,35 +84,87 @@ const PlaceOrder = () => {
 
   const handlePlaceOrder = async () => {
     try {
-      const res = await dispatch(
-        addOrderThunk({
-          cartItems: cartItems,
-          address:
-            (addressSelected?.structured_formatting?.main_text ?? "") +
+      const orderData = {
+        cartItems: cartItems,
+        address: addressSelected
+          ? (addressSelected?.structured_formatting?.main_text ?? "") +
             "//" +
-            (addressSelected?.structured_formatting?.secondary_text ?? ""),
-          fullName: form.fullname,
-          email: form.email,
-          phone: unFormatPhone(form.phone),
-          type: method,
-        })
-      ).unwrap();
-      if (res) {
+            (addressSelected?.structured_formatting?.secondary_text ?? "")
+          : userInfo?.address!,
+        fullName: form.fullname,
+        email: form.email,
+        phone: unFormatPhone(form.phone),
+        type: method,
+      };
+
+      // Tạo order trước (cho cả CASH và BANK)
+      const orderRes = await dispatch(addOrderThunk(orderData)).unwrap();
+
+      if (method === PaymentType.CASH) {
         clearCart();
         localStorage.removeItem("cart");
         navigate("/success");
+      } else if (method === PaymentType.BANK) {
+        localStorage.setItem("pendingOrder", JSON.stringify(orderRes));
+
+        const result = await dispatch(
+          createPaymentLinkThunk({
+            cartItems: cartItems,
+            orderCode: orderRes.orderCode,
+            returnUrl: window.location.origin + "/place-order",
+            cancelUrl: window.location.origin + "/place-order",
+          })
+        ).unwrap();
+
+        if (result) {
+          window.location.href = result.checkoutUrl;
+        }
       }
     } catch (error) {
       console.error("Failed to update user info:", error);
     }
   };
 
+  useEffect(() => {
+    const handlePaymentReturn = async () => {
+      const queryParams = new URLSearchParams(location.search);
+      const status = queryParams.get("status");
+      const code = queryParams.get("code");
+
+      if (status === "PAID" && code === "00") {
+        try {
+          const pendingOrderData = localStorage.getItem("pendingOrder");
+
+          if (pendingOrderData) {
+            const parsedOrder: OrderResponse = JSON.parse(pendingOrderData);
+
+            dispatch(setOrderAddedSuccess(parsedOrder));
+            clearCart();
+            localStorage.removeItem("cart");
+            localStorage.removeItem("pendingOrder");
+            navigate("/success");
+          }
+        } catch (error) {
+          console.error("Failed to create order:", error);
+          navigate("/place-order");
+        }
+      } else if (
+        status === "CANCELLED" ||
+        queryParams.get("cancel") === "true"
+      ) {
+        navigate("/place-order");
+      }
+    };
+
+    handlePaymentReturn();
+  }, []);
+
   const isValid =
     !form.address?.toString().length ||
     !form.fullname?.length ||
     !form.phone?.length ||
     !form.email.length ||
-    !isValidPhone(form.phone)||
+    !isValidPhone(form.phone) ||
     method === PaymentType.NONE;
 
   return (
@@ -302,17 +371,16 @@ const PlaceOrder = () => {
               <p className="text-gray-700 font-medium ml-2">Cash on Delivery</p>
             </div>
           </div>
-
         </div>
 
         <div className="w-full text-end">
           <button
-            disabled={loadingOrder || isValid}
+            disabled={loadingOrder || isValid || loadingPayment}
             onClick={() => handlePlaceOrder()}
             className={`bg-black text-white px-10 py-3 rounded-sm font-medium text-sm shadow-md hover:opacity-90 transition
             ${isValid ? "bg-gray-500" : "bg-black hover:opacity-90"}`}
           >
-            {loadingOrder ? (
+            {loadingOrder || loadingPayment ? (
               <LoadingSpinner size="small" color="white" />
             ) : (
               "PLACE ORDER"

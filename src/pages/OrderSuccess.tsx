@@ -1,4 +1,4 @@
-import { useState, useContext, useRef } from "react";
+import { useState, useContext, useRef, useEffect } from "react";
 import {
   CheckCircleOutlined,
   ShoppingOutlined,
@@ -15,18 +15,19 @@ import LoadingSpinner from "components/LoadingSpinner";
 import { ShopContext } from "../context/ShopContext";
 import { formatPrice } from "../utils/FormatPrice";
 import { useReactToPrint } from "react-to-print";
+import { setOrderAddedSuccess } from "@redux/slices/orderSlice";
+import { OrderResponse } from "common/models/order";
 
 const OrderSuccess = () => {
   const { currency, delivery_fee } = useContext(ShopContext);
   const navigate = useNavigate();
-  const dispatch = useDispatch<AppDispatch>();
   const { loadingOrder, orderAdded } = useSelector(
     (state: RootState) => state.order
   );
   const orderRef = useRef<HTMLDivElement>(null);
 
   const handlePrint = useReactToPrint({
-    contentRef: orderRef, // <== v3 đã thêm trực tiếp cái này
+    contentRef: orderRef,
     documentTitle: "Order Confirmation",
     onAfterPrint: () => console.log("In xong rồi ✅"),
   });
@@ -38,12 +39,12 @@ const OrderSuccess = () => {
     })
   );
 
-  console.log(orderAdded);
-
   const handleClick = (route: string) => {
     navigate(route);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
+
+  console.log(orderAdded);
 
   return (
     <div className="min-h-screen bg-white">

@@ -7,11 +7,7 @@ import {
   OrderResponse,
   SearchOrderRequest,
 } from "common/models/order";
-import {
-  getAllOrdersByCustomerThunk,
-  getAllOrdersThunk,
-  getOrderThunk,
-} from "@redux/thunk/orderThunk";
+import { getAllOrdersByCustomerThunk, getOrderThunk } from "@redux/thunk/orderThunk";
 import OrderDetailModal from "./OrderDetailModal";
 import { formatDate } from "../utils/FormatDate";
 import { DatePicker, Input, Pagination, Select } from "antd";
@@ -21,12 +17,12 @@ import {
   ClearOutlined,
   FilterOutlined,
   SearchOutlined,
-  ShoppingOutlined,
 } from "@ant-design/icons";
 import { resetOrder } from "@redux/slices/orderSlice";
 import { formatAddressPart } from "../utils/FormatAddressPart";
 import { ShopContext } from "../context/ShopContext";
 import { formatPrice } from "../utils/FormatPrice";
+import { resetFeedback } from "@redux/slices/feedbackSlice";
 
 const statusStyles: Record<OrderStatus, string> = {
   "": "bg-green-100 text-green-700",
@@ -63,7 +59,7 @@ const OrderInfo: React.FC<OrderInfoProps> = ({ activeTab }) => {
   const [pageSize, setPageSize] = useState(3);
 
   const dispatch = useDispatch<AppDispatch>();
-  const { loadingOrder, orders } = useSelector(
+  const { loadingOrder, orders, orderDetail } = useSelector(
     (state: RootState) => state.order
   );
 
@@ -83,7 +79,7 @@ const OrderInfo: React.FC<OrderInfoProps> = ({ activeTab }) => {
         : [selectedStatus];
 
     dispatch(
-      getAllOrdersThunk({
+      getAllOrdersByCustomerThunk({
         pageNo: currentPage - 1,
         pageSize,
         sortBy: "id",
@@ -103,6 +99,7 @@ const OrderInfo: React.FC<OrderInfoProps> = ({ activeTab }) => {
     searchQuery,
     selectedStatus,
     dateFrom,
+    orderDetail
   ]);
 
   const openOrder = async (orderId: number) => {
@@ -125,7 +122,7 @@ const OrderInfo: React.FC<OrderInfoProps> = ({ activeTab }) => {
   return (
     <>
       {/* Filters Section */}
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-8">
+      <div className="bg-white rounded-sm shadow-sm border border-slate-200 p-6 mb-8">
         <div className="flex flex-col lg:flex-row gap-4 lg:gap-1">
           {/* Search Input */}
           <div className="flex-1">
@@ -135,19 +132,19 @@ const OrderInfo: React.FC<OrderInfoProps> = ({ activeTab }) => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               size="large"
-              className="rounded-xl border-slate-200 hover:border-blue-300 focus:border-blue-400"
+              className="rounded-lg border-slate-200 hover:border-blue-300 focus:border-blue-400"
               allowClear
             />
           </div>
 
           {/* Status Filter */}
-          <div className="w-full lg:w-48">
+          <div className="w-full lg:w-52">
             <Select
               placeholder="Filter by Status"
               value={selectedStatus}
               onChange={setSelectedStatus}
               size="large"
-              className="w-full rounded-xl"
+              className="w-full rounded-sm outline-none border-slate-200 hover:border-blue-300"
               suffixIcon={<FilterOutlined />}
               options={statusOptions}
             />
@@ -159,7 +156,7 @@ const OrderInfo: React.FC<OrderInfoProps> = ({ activeTab }) => {
               value={dateFrom}
               onChange={setDateFrom}
               size="large"
-              className="w-full rounded-xl border-slate-200 hover:border-blue-300"
+              className="w-full rounded-lg border-slate-200 hover:border-blue-300"
               suffixIcon={<CalendarOutlined />}
             />
           </div>
@@ -168,7 +165,7 @@ const OrderInfo: React.FC<OrderInfoProps> = ({ activeTab }) => {
           {hasActiveFilters && (
             <button
               onClick={clearFilters}
-              className="flex items-center gap-2 px-4 py-2 text-slate-600 hover:text-slate-800 hover:bg-slate-50 rounded-xl transition-colors"
+              className="flex items-center gap-2 px-4 py-2 text-slate-600 hover:text-slate-800 hover:bg-slate-50 rounded-sm transition-colors"
             >
               <ClearOutlined />
               Clear
@@ -185,8 +182,11 @@ const OrderInfo: React.FC<OrderInfoProps> = ({ activeTab }) => {
           {orders.content.map((o) => (
             <article
               key={o.id}
-              onClick={() => openOrder(o.id)}
-              className="cursor-pointer group relative bg-white rounded-2xl border shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-200 p-4 sm:p-5 flex flex-col sm:flex-row gap-4 sm:gap-6"
+              onClick={() => {
+                openOrder(o.id);
+                dispatch(resetFeedback());
+              }}
+              className="cursor-pointer group relative bg-white rounded-sm border shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-200 p-4 sm:p-5 flex flex-col sm:flex-row gap-4 sm:gap-6"
             >
               {/* Product image */}
               <div className="flex-shrink-0">
@@ -197,10 +197,10 @@ const OrderInfo: React.FC<OrderInfoProps> = ({ activeTab }) => {
                       "/images/product-placeholder.png"
                     }
                     alt={o.orderDetails[0]?.product?.name || "Product"}
-                    className="w-24 h-24 object-cover rounded-2xl shadow-md ring-1 ring-slate-200"
+                    className="w-24 h-24 object-cover rounded-sm shadow-md ring-1 ring-slate-200"
                   />
                   {o.orderDetails.length > 1 && (
-                    <div className="absolute -top-2 -right-2 bg-blue-500 text-white text-xs font-medium rounded-full w-6 h-6 flex items-center justify-center">
+                    <div className="absolute -top-2 -right-2 bg-blue-500 text-white text-xs font-medium rounded-sm w-6 h-6 flex items-center justify-center">
                       +{o.orderDetails.length - 1}
                     </div>
                   )}
@@ -222,7 +222,7 @@ const OrderInfo: React.FC<OrderInfoProps> = ({ activeTab }) => {
                       </div>
                       <div className="sm:hidden mt-2">
                         <span
-                          className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
+                          className={`inline-block px-3 py-1 rounded-sm text-xs font-medium ${
                             statusStyles[o.status]
                           }`}
                         >
@@ -282,7 +282,7 @@ const OrderInfo: React.FC<OrderInfoProps> = ({ activeTab }) => {
                   {/* Button */}
                   <button
                     onClick={() => openOrder(o.id)}
-                    className="w-full sm:w-auto px-4 py-2 rounded-lg bg-black text-white text-sm font-medium shadow hover:opacity-90 transition"
+                    className="w-full sm:w-auto px-4 py-2 rounded-sm bg-black text-white text-sm font-medium shadow hover:bg-gray-800 transition"
                   >
                     View Details
                   </button>
@@ -311,7 +311,10 @@ const OrderInfo: React.FC<OrderInfoProps> = ({ activeTab }) => {
 
       <OrderDetailModal
         open={modalOpen}
-        onClose={() => setModalOpen(false)}
+        onClose={() => {
+          setModalOpen(false);
+          dispatch(resetFeedback());
+        }}
         order={selectedOrder}
       />
     </>

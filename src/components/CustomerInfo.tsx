@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { uploadToCloudinary } from "../utils/CloudinaryImageUploader";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@redux/store";
@@ -11,12 +11,14 @@ import { fetchAddressSuggestions } from "../utils/GoongLocation";
 import {
   CheckCircleFilled,
   CloseCircleFilled,
-  CloseCircleOutlined,
   EnvironmentOutlined,
   PlusOutlined,
 } from "@ant-design/icons";
 import { Suggestion } from "common/models/location";
 import { formatAddressPart } from "../utils/FormatAddressPart";
+import { getOrderInfoOfCustomerThunk } from "@redux/thunk/orderThunk";
+import { formatPrice } from "../utils/FormatPrice";
+import { ShopContext } from "../context/ShopContext";
 
 type Status = "active" | "inactive" | "banned";
 
@@ -26,12 +28,6 @@ interface CustomerInfoProps {
   address: string | null;
   image?: string | null;
   status?: EntityStatus;
-  onSave?: (data: {
-    fullname: string;
-    phone: string;
-    address: string;
-    status: Status;
-  }) => void;
 }
 
 const statusStyles: Record<EntityStatus, string> = {
@@ -46,12 +42,12 @@ const CustomerInfo: React.FC<CustomerInfoProps> = ({
   address,
   image,
   status = EntityStatus.ACTIVE,
-  onSave,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<File>();
   const [uploadingImage, setUploadingImage] = useState(false);
   const [addressSelected, setAddressSelected] = useState<Suggestion>();
+    const { currency } = useContext(ShopContext);
 
   // normalize initial form state to avoid nulls
   const [form, setForm] = useState({
@@ -67,6 +63,7 @@ const CustomerInfo: React.FC<CustomerInfoProps> = ({
     (state: RootState) => state.user
   );
   const { userInfo } = useSelector((state: RootState) => state.auth);
+  const { orderAdded, orderInfo } = useSelector((state: RootState) => state.order);
 
   // keep form in sync if parent props change (important)
   useEffect(() => {
@@ -77,6 +74,10 @@ const CustomerInfo: React.FC<CustomerInfoProps> = ({
       image: image ?? "",
     });
   }, [fullname, phone, address, image]);
+
+  useEffect(()=>{
+    dispatch(getOrderInfoOfCustomerThunk())
+  }, [dispatch, orderAdded])
 
   useEffect(() => {
     if (isEditing) {
@@ -208,7 +209,7 @@ const CustomerInfo: React.FC<CustomerInfoProps> = ({
           <div className="sm:ml-auto flex gap-3 mt-3 sm:mt-0 flex-wrap">
             <button
               onClick={() => setIsEditing(true)}
-              className="w-full sm:w-auto inline-flex justify-center items-center gap-2 px-4 py-2 bg-black text-white rounded-lg text-sm hover:opacity-80"
+              className="w-full sm:w-auto inline-flex justify-center items-center gap-2 px-4 py-2 bg-black text-white rounded-sm text-sm hover:bg-gray-800"
             >
               Edit
             </button>
@@ -258,13 +259,13 @@ const CustomerInfo: React.FC<CustomerInfoProps> = ({
             <div className="mt-3 space-y-3 text-gray-700">
               <div className="bg-gray-50 rounded-lg p-3">
                 <p className="text-sm text-gray-500">Orders</p>
-                <p className="text-lg font-semibold text-gray-800 mt-1">12</p>
+                <p className="text-lg font-semibold text-gray-800 mt-1">{orderInfo?.numberOfOrder}</p>
               </div>
 
               <div className="bg-gray-50 rounded-lg p-3">
                 <p className="text-sm text-gray-500">Total spent</p>
                 <p className="text-lg font-semibold text-gray-800 mt-1">
-                  ₫12,450,000
+                  {formatPrice(orderInfo?.totalPrice!)}{currency}
                 </p>
               </div>
             </div>

@@ -2,6 +2,7 @@ import { RootState } from "@redux/store";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { OrderStatus } from "common/enums/OrderStatus";
 import {
+  OrderInfo,
   OrderRequest,
   OrderResponse,
   SearchOrderRequest,
@@ -97,6 +98,26 @@ export const getOrderThunk = createAsyncThunk<
   } catch (error: any) {
     return thunkAPI.rejectWithValue(
       error.response?.data?.message || "get order detail failed"
+    );
+  }
+});
+
+export const getOrderInfoOfCustomerThunk = createAsyncThunk<
+  OrderInfo,
+  void,
+  { state: RootState }
+>("order/getOrderInfoOfCustomer", async (_, thunkAPI) => {
+  const state = thunkAPI.getState();
+  const accessToken = state.auth.accessToken;
+  if (!accessToken) {
+    return thunkAPI.rejectWithValue("No access token available");
+  }
+  try {
+    const data = await OrderService.getOrderInfoOfCustomer(accessToken);
+    return data;
+  } catch (error: any) {
+    return thunkAPI.rejectWithValue(
+      error.response?.data?.message || "get order info detail failed"
     );
   }
 });

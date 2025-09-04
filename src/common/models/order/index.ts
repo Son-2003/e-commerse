@@ -33,6 +33,7 @@ export interface OrderRequest {
 
 export interface OrderResponse {
   id: number;
+  orderCode: number;
   createdDate: Date;
   status: OrderStatus;
   isFeedback: boolean;
@@ -49,4 +50,9 @@ export interface SearchOrderRequest {
   dateTo?: Date;
   statuses?: OrderStatus[];
   searchText?: string;
+}
+
+export interface OrderInfo {
+  numberOfOrder: number;
+  totalPrice: number;
 }

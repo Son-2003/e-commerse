@@ -1,6 +1,7 @@
 import axios from "axios";
 import { OrderStatus } from "common/enums/OrderStatus";
 import {
+  OrderInfo,
   OrderRequest,
   OrderResponse,
   SearchOrderRequest,
@@ -77,6 +78,24 @@ const getOrder = async (
   }
 };
 
+const getOrderInfoOfCustomer = async (
+  accessToken: string
+): Promise<OrderInfo> => {
+  try {
+    const response = await axios.get<OrderInfo>(
+      `${API_BASE_URL}/orders/info`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error: any) {
+    throw error;
+  }
+};
+
 const addOrder = async (
   accessToken?: string | null,
   request?: OrderRequest
@@ -124,6 +143,7 @@ const updateOrder = async (
 export default {
   getAllOrders,
   getAllOrdersByCustomer,
+  getOrderInfoOfCustomer,
   getOrder,
   addOrder,
   updateOrder,

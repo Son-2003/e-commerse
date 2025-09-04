@@ -2,6 +2,7 @@ import {
   addOrderThunk,
   getAllOrdersByCustomerThunk,
   getAllOrdersThunk,
+  getOrderInfoOfCustomerThunk,
   getOrderThunk,
   updateOrderThunk,
 } from "@redux/thunk/orderThunk";
@@ -10,7 +11,7 @@ import {
   createSlice,
   PayloadAction,
 } from "@reduxjs/toolkit";
-import { OrderResponse } from "common/models/order";
+import { OrderInfo, OrderResponse } from "common/models/order";
 import { ResponseEntityPagination } from "common/models/pagination";
 
 interface OrderState {
@@ -18,6 +19,7 @@ interface OrderState {
   orderDetail: OrderResponse | null;
   orderAdded: OrderResponse | null;
   orderUpdated: OrderResponse | null;
+  orderInfo: OrderInfo | null;
   loadingOrder: boolean;
   errorOrder: string | null;
 }
@@ -34,6 +36,7 @@ const initialState: OrderState = {
   orderDetail: null,
   orderAdded: null,
   orderUpdated: null,
+  orderInfo: null,
   loadingOrder: false,
   errorOrder: null,
 };
@@ -46,11 +49,16 @@ const orderSlice = createSlice({
       state.orderAdded = null;
       state.orderDetail = null;
     },
+
+    setOrderAddedSuccess: (state, action: PayloadAction<OrderResponse>) => {
+      state.orderAdded = action.payload;
+    },
   },
   extraReducers: (builder) => {
     getAllOrders(builder);
     getAllOrdersByCustomer(builder);
     getOrder(builder);
+    getOrderInfoOfCustomer(builder);
     updateOrder(builder);
     addOrder(builder);
   },
@@ -126,6 +134,28 @@ function getOrder(builder: ActionReducerMapBuilder<OrderState>) {
     });
 }
 
+function getOrderInfoOfCustomer(builder: ActionReducerMapBuilder<OrderState>) {
+  builder
+    .addCase(getOrderInfoOfCustomerThunk.pending, (state) => {
+      state.loadingOrder = true;
+      state.errorOrder = null;
+    })
+    .addCase(
+      getOrderInfoOfCustomerThunk.fulfilled,
+      (state, action: PayloadAction<OrderInfo>) => {
+        state.loadingOrder = false;
+        state.orderInfo = action.payload;
+      }
+    )
+    .addCase(
+      getOrderInfoOfCustomerThunk.rejected,
+      (state, action: PayloadAction<any>) => {
+        state.loadingOrder = false;
+        state.errorOrder = action.payload || "get order info detail failed";
+      }
+    );
+}
+
 function addOrder(builder: ActionReducerMapBuilder<OrderState>) {
   builder
     .addCase(addOrderThunk.pending, (state) => {
@@ -164,5 +194,5 @@ function updateOrder(builder: ActionReducerMapBuilder<OrderState>) {
     });
 }
 
-export const { resetOrder } = orderSlice.actions;
+export const { resetOrder, setOrderAddedSuccess } = orderSlice.actions;
 export default orderSlice.reducer;

@@ -20,7 +20,7 @@ const Collection = () => {
   const [subCategory, setSubCategory] = useState<SubCategory[]>([]);
   const [sortOption, setSortOption] = useState("relavent");
   const [sortBySelected, setSortBySelected] = useState("id");
-  const [sortDirSelected, setSortDirSelected] = useState("asc");
+  const [sortDirSelected, setSortDirSelected] = useState("desc");
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 

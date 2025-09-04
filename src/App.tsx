@@ -16,47 +16,48 @@ import Profile from "./pages/Profile";
 import OrderSuccess from "./pages/OrderSuccess";
 import ProtectedRoute from "components/ProtectedRoute";
 import { useEffect } from "react";
+import PublicRoute from "components/PublicRoute";
 
 const App = () => {
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (
-        e.key === "F12" ||
-        (e.ctrlKey &&
-          e.shiftKey &&
-          ["I", "J", "C"].includes(e.key.toUpperCase())) ||
-        (e.ctrlKey && e.key.toUpperCase() === "U")
-      ) {
-        e.preventDefault();
-        e.stopPropagation();
-        return false;
-      }
-    };
+  // useEffect(() => {
+  //   const handleKeyDown = (e: KeyboardEvent) => {
+  //     if (
+  //       e.key === "F12" ||
+  //       (e.ctrlKey &&
+  //         e.shiftKey &&
+  //         ["I", "J", "C"].includes(e.key.toUpperCase())) ||
+  //       (e.ctrlKey && e.key.toUpperCase() === "U")
+  //     ) {
+  //       e.preventDefault();
+  //       e.stopPropagation();
+  //       return false;
+  //     }
+  //   };
 
-    const handleKeyUp = (e: KeyboardEvent) => {
-      if (e.key === "F12") {
-        e.preventDefault();
-        e.stopPropagation();
-        return false;
-      }
-    };
+  //   const handleKeyUp = (e: KeyboardEvent) => {
+  //     if (e.key === "F12") {
+  //       e.preventDefault();
+  //       e.stopPropagation();
+  //       return false;
+  //     }
+  //   };
 
-    const handleContextMenu = (e: MouseEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      return false;
-    };
+  //   const handleContextMenu = (e: MouseEvent) => {
+  //     e.preventDefault();
+  //     e.stopPropagation();
+  //     return false;
+  //   };
 
-    document.addEventListener("keydown", handleKeyDown, true);
-    document.addEventListener("keyup", handleKeyUp, true);
-    document.addEventListener("contextmenu", handleContextMenu, true);
+  //   document.addEventListener("keydown", handleKeyDown, true);
+  //   document.addEventListener("keyup", handleKeyUp, true);
+  //   document.addEventListener("contextmenu", handleContextMenu, true);
 
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown, true);
-      document.removeEventListener("keyup", handleKeyUp, true);
-      document.removeEventListener("contextmenu", handleContextMenu, true);
-    };
-  }, []);
+  //   return () => {
+  //     document.removeEventListener("keydown", handleKeyDown, true);
+  //     document.removeEventListener("keyup", handleKeyUp, true);
+  //     document.removeEventListener("contextmenu", handleContextMenu, true);
+  //   };
+  // }, []);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -71,23 +72,16 @@ const App = () => {
           <Route path="/contact" element={<Contact />} />
           <Route path="/product/:productId" element={<Product />} />
           <Route path="/cart" element={<Cart />} />
-          <Route path="/login" element={<Login />} />
           <Route
-            path="/place-order"
+            path="/login"
             element={
-              <ProtectedRoute>
-                <PlaceOrder />
-              </ProtectedRoute>
+              <PublicRoute>
+                <Login />
+              </PublicRoute>
             }
           />
-          <Route
-            path="/success"
-            element={
-              <ProtectedRoute>
-                <OrderSuccess />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="/place-order" element={<PlaceOrder />} />
+          <Route path="/success" element={<OrderSuccess />} />
           <Route
             path="/profile"
             element={
