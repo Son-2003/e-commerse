@@ -19,45 +19,45 @@ import { useEffect } from "react";
 import PublicRoute from "components/PublicRoute";
 
 const App = () => {
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (
-        e.key === "F12" ||
-        (e.ctrlKey &&
-          e.shiftKey &&
-          ["I", "J", "C"].includes(e.key.toUpperCase())) ||
-        (e.ctrlKey && e.key.toUpperCase() === "U")
-      ) {
-        e.preventDefault();
-        e.stopPropagation();
-        return false;
-      }
-    };
+  // useEffect(() => {
+  //   const handleKeyDown = (e: KeyboardEvent) => {
+  //     if (
+  //       e.key === "F12" ||
+  //       (e.ctrlKey &&
+  //         e.shiftKey &&
+  //         ["I", "J", "C"].includes(e.key.toUpperCase())) ||
+  //       (e.ctrlKey && e.key.toUpperCase() === "U")
+  //     ) {
+  //       e.preventDefault();
+  //       e.stopPropagation();
+  //       return false;
+  //     }
+  //   };
 
-    const handleKeyUp = (e: KeyboardEvent) => {
-      if (e.key === "F12") {
-        e.preventDefault();
-        e.stopPropagation();
-        return false;
-      }
-    };
+  //   const handleKeyUp = (e: KeyboardEvent) => {
+  //     if (e.key === "F12") {
+  //       e.preventDefault();
+  //       e.stopPropagation();
+  //       return false;
+  //     }
+  //   };
 
-    const handleContextMenu = (e: MouseEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      return false;
-    };
+  //   const handleContextMenu = (e: MouseEvent) => {
+  //     e.preventDefault();
+  //     e.stopPropagation();
+  //     return false;
+  //   };
 
-    document.addEventListener("keydown", handleKeyDown, true);
-    document.addEventListener("keyup", handleKeyUp, true);
-    document.addEventListener("contextmenu", handleContextMenu, true);
+  //   document.addEventListener("keydown", handleKeyDown, true);
+  //   document.addEventListener("keyup", handleKeyUp, true);
+  //   document.addEventListener("contextmenu", handleContextMenu, true);
 
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown, true);
-      document.removeEventListener("keyup", handleKeyUp, true);
-      document.removeEventListener("contextmenu", handleContextMenu, true);
-    };
-  }, []);
+  //   return () => {
+  //     document.removeEventListener("keydown", handleKeyDown, true);
+  //     document.removeEventListener("keyup", handleKeyUp, true);
+  //     document.removeEventListener("contextmenu", handleContextMenu, true);
+  //   };
+  // }, []);
 
   return (
     <div className="flex flex-col min-h-screen">
