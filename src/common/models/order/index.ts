@@ -4,6 +4,7 @@ import { PaymentHistoryResponse } from "../payment";
 import { FeedbackResponse } from "../feedback";
 import { UserResponse } from "../user";
 import { PaymentType } from "common/enums/PaymentType";
+import { SizeResponse } from "../size";
 
 export interface CartItem {
   id: number;
@@ -12,6 +13,7 @@ export interface CartItem {
   image: string;
   price: number;
   size: string;
+  sizes: SizeResponse[]
 }
 
 export interface OrderDetailResponse {

@@ -32,7 +32,7 @@ const LastCollection = () => {
 
       {/* Rendering Products */}
       {loadingProducts ? (
-        <LoadingSpinner/>
+        <LoadingSpinner />
       ) : (
         <>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 gap-y-6">
@@ -40,9 +40,11 @@ const LastCollection = () => {
               <ProductItem
                 key={index}
                 id={item.id}
-                image={item.image}
+                image={item.image.split(",")[0]}
                 name={item.name}
                 price={item.price}
+                sizes={item.sizes}
+                description={item.description}
               />
             ))}
           </div>

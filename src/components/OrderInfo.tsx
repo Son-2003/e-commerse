@@ -7,7 +7,10 @@ import {
   OrderResponse,
   SearchOrderRequest,
 } from "common/models/order";
-import { getAllOrdersByCustomerThunk, getOrderThunk } from "@redux/thunk/orderThunk";
+import {
+  getAllOrdersByCustomerThunk,
+  getOrderThunk,
+} from "@redux/thunk/orderThunk";
 import OrderDetailModal from "./OrderDetailModal";
 import { formatDate } from "../utils/FormatDate";
 import { DatePicker, Input, Pagination, Select } from "antd";
@@ -99,7 +102,7 @@ const OrderInfo: React.FC<OrderInfoProps> = ({ activeTab }) => {
     searchQuery,
     selectedStatus,
     dateFrom,
-    orderDetail
+    orderDetail,
   ]);
 
   const openOrder = async (orderId: number) => {
@@ -177,7 +180,7 @@ const OrderInfo: React.FC<OrderInfoProps> = ({ activeTab }) => {
         <div className="h-screen flex items-center justify-center">
           <LoadingSpinner />
         </div>
-      ) : (
+      ) : orders && orders.content.length > 0 ? (
         <div className="space-y-6">
           {orders.content.map((o) => (
             <article
@@ -306,6 +309,23 @@ const OrderInfo: React.FC<OrderInfoProps> = ({ activeTab }) => {
               responsive
             />
           </div>
+        </div>
+      ) : (
+        <div className="flex flex-col items-center justify-center py-12 text-center">
+          <svg
+            className="w-12 h-12 text-gray-300 mb-3"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M9 13h6m-3-3v6m9-3a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+          <p className="text-gray-500 text-sm">Don't have any orders</p>
         </div>
       )}
 

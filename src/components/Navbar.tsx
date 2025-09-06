@@ -122,41 +122,46 @@ const Navbar = () => {
               </p>
             </div>
           ) : (
-            <div className="group relative flex-shrink-0">
-              <img
-                src={assets.profile_icon}
-                alt="profile-icon"
-                className="w-5 cursor-pointer"
-              />
+            !location.pathname.startsWith("/profile") && (
+              <div className="group relative flex-shrink-0">
+                <img
+                  src={assets.profile_icon}
+                  alt="profile-icon"
+                  className="w-5 cursor-pointer"
+                />
 
-              <div className="group-hover:block hidden absolute right-0 pt-2">
-                <div className="flex flex-col bg-white rounded-sm overflow-hidden border border-gray-100">
-                  <div className="px-5 py-3 border-b">
-                    <p className="text-gray-800 font-semibold text-sm truncate">
-                      Hello, {userInfo.fullName}
-                    </p>
-                  </div>
+                <div className="group-hover:block hidden absolute right-0 pt-2">
+                  <div className="flex flex-col bg-white rounded-sm overflow-hidden border border-gray-100">
+                    <div className="px-5 py-3 border-b">
+                      <p className="text-gray-800 font-semibold text-sm truncate">
+                        Hello, {userInfo.fullName}
+                      </p>
+                    </div>
 
-                  <div className="flex flex-col">
-                    <button
-                      className="px-5 py-2 text-gray-600 hover:bg-gray-50 hover:text-gray-900 text-left transition"
-                      onClick={() => handleClick("profile")}
-                    >
-                      My Profile
-                    </button>
-                    <button className="px-5 py-2 text-gray-600 hover:bg-gray-50 hover:text-gray-900 text-left transition">
-                      History
-                    </button>
-                    <button
-                      className="px-5 py-2 text-red-500 hover:bg-red-50 hover:text-red-600 text-left transition"
-                      onClick={handleLogout}
-                    >
-                      Log Out
-                    </button>
+                    <div className="flex flex-col">
+                      <button
+                        className="px-5 py-2 text-gray-600 hover:bg-gray-50 hover:text-gray-900 text-left transition"
+                        onClick={() => handleClick("profile/profile")}
+                      >
+                        My Info
+                      </button>
+                      <button
+                        onClick={() => handleClick("profile/orders")}
+                        className="px-5 py-2 text-gray-600 hover:bg-gray-50 hover:text-gray-900 text-left transition"
+                      >
+                        History
+                      </button>
+                      <button
+                        className="px-5 py-2 text-red-500 hover:bg-red-50 hover:text-red-600 text-left transition"
+                        onClick={handleLogout}
+                      >
+                        Log Out
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )
           )}
 
           <img

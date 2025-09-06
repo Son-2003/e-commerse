@@ -17,10 +17,14 @@ interface ShopContextType {
   showSearch: boolean;
   setShowSearch: (value: boolean) => void;
   cartItems: CartItem[];
+  cartItemBuyNow: CartItem[];
   addToCart: (item: CartItem) => void;
+  addItemToBuyNow: (item: CartItem) => void;
+  updateCart: (updatedItem: CartItem) => void;
   decrementFromCart: (item: CartItem) => void;
   removeFromCart: (item: CartItem) => void;
   clearCart: () => void;
+  clearItemBuyNow: () => void;
   getCartCount: () => number;
   getCartAmount: () => number;
   navigate: ReturnType<typeof useNavigate>;
@@ -41,10 +45,14 @@ const ShopContextProvider = ({ children }: ShopContextProviderProps) => {
   const [currentState, setCurrentState] = useState<string>("Sign In");
   const [showSearch, setShowSearch] = useState<boolean>(false);
   const [cartItems, setCartItems] = useState<CartItem[]>(() => {
-    // Load from localStorage when app starts
     const storedCart = localStorage.getItem("cart");
     return storedCart ? JSON.parse(storedCart) : [];
   });
+  const [cartItemBuyNow, setCartItemBuyNow] = useState<CartItem[]>(() => {
+    const storedCart = localStorage.getItem("buyNow");
+    return storedCart ? JSON.parse(storedCart) : [];
+  });
+
   const navigate = useNavigate();
 
   const dispatch = useDispatch<AppDispatch>();
@@ -71,6 +79,10 @@ const ShopContextProvider = ({ children }: ShopContextProviderProps) => {
     localStorage.setItem("cart", JSON.stringify(cartItems));
   }, [cartItems]);
 
+  useEffect(() => {
+    localStorage.setItem("buyNow", JSON.stringify(cartItemBuyNow));
+  }, [cartItemBuyNow]);
+
   const addToCart = (item: CartItem) => {
     setCartItems((prevCart) => {
       const existingIndex = prevCart.findIndex(
@@ -84,6 +96,33 @@ const ShopContextProvider = ({ children }: ShopContextProviderProps) => {
       }
 
       return [...prevCart, item];
+    });
+  };
+
+  const addItemToBuyNow = (item: CartItem) => {
+    setCartItemBuyNow([]);
+    setCartItemBuyNow((prevCart) => {
+      const existingIndex = prevCart.findIndex(
+        (p) => p.id === item.id && p.size === item.size
+      );
+
+      if (existingIndex !== -1) {
+        const updatedCart = [...prevCart];
+        updatedCart[existingIndex].quantity = item.quantity + 1;
+        return updatedCart;
+      }
+
+      return [...prevCart, item];
+    });
+  };
+
+  const updateCart = (updatedItem: CartItem) => {
+    setCartItems((prevCart) => {
+      return prevCart.map((item) =>
+        item.id === updatedItem.id
+          ? { ...item, quantity: updatedItem.quantity, size: updatedItem.size }
+          : item
+      );
     });
   };
 
@@ -118,6 +157,10 @@ const ShopContextProvider = ({ children }: ShopContextProviderProps) => {
     setCartItems([]);
   };
 
+  const clearItemBuyNow = () => {
+    setCartItemBuyNow([]);
+  };
+
   const getCartAmount = (): number => {
     let total = 0;
     cartItems.map((item) => (total += item.price * item.quantity));
@@ -134,11 +177,15 @@ const ShopContextProvider = ({ children }: ShopContextProviderProps) => {
     showSearch,
     setShowSearch,
     cartItems,
+    cartItemBuyNow,
     addToCart,
+    addItemToBuyNow,
+    updateCart,
     getCartCount,
     decrementFromCart,
     removeFromCart,
     clearCart,
+    clearItemBuyNow,
     getCartAmount,
     navigate,
     products: products.content,

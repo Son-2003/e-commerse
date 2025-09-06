@@ -69,7 +69,7 @@ const Login = () => {
   }, [dispatch, name, email, password, isSignIn, navigate]);
 
   return (
-    <div className="flex flex-col items-center w-[90%] rounded-sm m-auto mt-14 gap-4 text-gray-800">
+    <div className="flex flex-col items-center w-[90%] rounded-sm m-auto mt-14 gap-4 text-gray-800 h-screen">
       <form
         onSubmit={(e) => {
           e.preventDefault();

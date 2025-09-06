@@ -8,7 +8,9 @@ import {
   CloseCircleFilled,
   DollarOutlined,
   EnvironmentOutlined,
+  HeartOutlined,
   PlusOutlined,
+  TagOutlined,
 } from "@ant-design/icons";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@redux/store";
@@ -26,10 +28,12 @@ import { Suggestion } from "common/models/location";
 import { formatAddressPart } from "../utils/FormatAddressPart";
 import { createPaymentLinkThunk } from "@redux/thunk/paymentThunk";
 import { setOrderAddedSuccess } from "@redux/slices/orderSlice";
-import { OrderResponse } from "common/models/order";
+import { CartItem, OrderResponse } from "common/models/order";
+import { formatPrice } from "../utils/FormatPrice";
 
 const PlaceOrder = () => {
-  const { cartItems, clearCart } = useContext(ShopContext);
+  const { cartItems, cartItemBuyNow, clearCart, currency } =
+    useContext(ShopContext);
   const [method, setMethod] = useState<PaymentType>(PaymentType.NONE);
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const { navigate } = useContext(ShopContext);
@@ -85,7 +89,7 @@ const PlaceOrder = () => {
   const handlePlaceOrder = async () => {
     try {
       const orderData = {
-        cartItems: cartItems,
+        cartItems: cartItemBuyNow.length > 0 ? cartItemBuyNow : cartItems,
         address: addressSelected
           ? (addressSelected?.structured_formatting?.main_text ?? "") +
             "//" +
@@ -109,7 +113,7 @@ const PlaceOrder = () => {
 
         const result = await dispatch(
           createPaymentLinkThunk({
-            cartItems: cartItems,
+            cartItems: cartItemBuyNow.length > 0 ? cartItemBuyNow : cartItems,
             orderCode: orderRes.orderCode,
             returnUrl: window.location.origin + "/place-order",
             cancelUrl: window.location.origin + "/place-order",
@@ -170,7 +174,7 @@ const PlaceOrder = () => {
   return (
     <div className="flex flex-col sm:flex-row justify-between gap-4 pt-5 sm:pt-14 min-h-[80vh] border-t px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]">
       {/* Left Side */}
-      <div className="flex-1 bg-white rounded-2xl p-6 space-y-4">
+      <div className="sm:w-1/2 bg-white rounded-2xl p-6 space-y-4">
         <div className="text-xl sm:text-2xl font-semibold text-gray-800">
           <Title text1="DELIVERY" text2="INFORMATION" />
         </div>
@@ -182,7 +186,7 @@ const PlaceOrder = () => {
               name="fullname"
               value={form.fullname}
               onChange={handleChange}
-              className="border border-gray-300 rounded-xl py-3 px-4 w-full outline-none"
+              className="border border-gray-300 rounded-sm py-3 px-4 w-full outline-none"
               type="text"
               placeholder="Full name"
             />
@@ -205,7 +209,7 @@ const PlaceOrder = () => {
               name="email"
               onChange={handleChange}
               value={form.email}
-              className="border border-gray-300 rounded-xl py-3 px-4 w-full outline-none"
+              className="border border-gray-300 rounded-sm py-3 px-4 w-full outline-none"
               type="email"
               placeholder="Email address"
             />
@@ -228,7 +232,7 @@ const PlaceOrder = () => {
               name="address"
               onChange={handleChange}
               value={form.address}
-              className="border border-gray-300 rounded-xl py-3 px-4 w-full outline-none"
+              className="border border-gray-300 rounded-sm py-3 px-4 w-full outline-none"
               type="text"
               placeholder="Address"
             />
@@ -278,7 +282,7 @@ const PlaceOrder = () => {
                   setForm({ ...form, address: form.address });
                   setSuggestions([]);
                 }}
-                className="px-4 py-3 bg-blue-50 hover:bg-blue-100 cursor-pointer text-sm text-blue-700 font-medium flex flex-col gap-1 rounded-b-xl"
+                className="px-4 py-3 bg-blue-50 hover:bg-blue-100 cursor-pointer text-sm text-blue-700 font-medium flex flex-col gap-1 rounded-b-sm"
               >
                 <div className="items-center">
                   <div className="flex gap-2">
@@ -302,7 +306,7 @@ const PlaceOrder = () => {
               name="phone"
               value={form.phone}
               onChange={handleChange}
-              className="border border-gray-300 rounded-xl py-3 px-4 w-full outline-none"
+              className="border border-gray-300 rounded-sm py-3 px-4 w-full outline-none"
               type="text"
               placeholder="Phone"
             />
@@ -317,15 +321,8 @@ const PlaceOrder = () => {
             )}
           </div>
         </div>
-      </div>
 
-      {/* Right Side */}
-      <div className="flex-1 flex flex-col gap-6">
-        <div className="bg-white rounded-2xl p-6">
-          <CartTotal />
-        </div>
-
-        <div className="bg-white rounded-2xl p-6">
+        <div className="bg-white rounded-sm pt-6">
           <div className="text-xl sm:text-2xl font-semibold text-gray-800 mb-4">
             <Title text1="PAYMENT" text2="METHOD" />
           </div>
@@ -334,7 +331,7 @@ const PlaceOrder = () => {
             {/* BANK */}
             <div
               onClick={() => setMethod(PaymentType.BANK)}
-              className={`flex items-center gap-3 border rounded-xl p-4 cursor-pointer transition ${
+              className={`flex items-center gap-3 border rounded-sm p-4 cursor-pointer transition ${
                 method === PaymentType.BANK
                   ? "border-green-500 bg-green-50"
                   : "border-gray-200 hover:border-black"
@@ -354,7 +351,7 @@ const PlaceOrder = () => {
             {/* COD */}
             <div
               onClick={() => setMethod(PaymentType.CASH)}
-              className={`flex items-center gap-3 border rounded-xl p-4 cursor-pointer transition ${
+              className={`flex items-center gap-3 border rounded-sm p-4 cursor-pointer transition ${
                 method === PaymentType.CASH
                   ? "border-green-500 bg-green-50"
                   : "border-gray-200 hover:border-black"
@@ -373,11 +370,11 @@ const PlaceOrder = () => {
           </div>
         </div>
 
-        <div className="w-full text-end">
+        <div className="w-full text-start">
           <button
             disabled={loadingOrder || isValid || loadingPayment}
             onClick={() => handlePlaceOrder()}
-            className={`bg-black text-white px-10 py-3 rounded-sm font-medium text-sm shadow-md hover:opacity-90 transition
+            className={`bg-black text-white w-full px-10 py-3 rounded-sm font-medium text-sm shadow-md hover:opacity-90 transition
             ${isValid ? "bg-gray-500" : "bg-black hover:opacity-90"}`}
           >
             {loadingOrder || loadingPayment ? (
@@ -386,6 +383,136 @@ const PlaceOrder = () => {
               "PLACE ORDER"
             )}
           </button>
+        </div>
+      </div>
+
+      {/* Right Side */}
+      <div className="sm:w-1/2 flex flex-col gap-6">
+        <div className="space-y-4">
+          {cartItemBuyNow.length > 0
+            ? cartItemBuyNow.map((item: CartItem, index: number) => (
+                <div
+                  key={`${index}`}
+                  className="group relative rounded-sm bg-white border"
+                >
+                  <div className="relative p-6">
+                    <div className="flex flex-col lg:flex-row gap-6">
+                      {/* Product Image */}
+                      <div className="flex-shrink-0">
+                        <div className="relative group/image">
+                          <div className="w-24 h-24 lg:w-28 lg:h-28 rounded-sm overflow-hidden transition-all duration-300">
+                            <img
+                              src={item.image}
+                              alt={item.name}
+                              className="w-full h-full object-cover group-hover/image:scale-105 transition-transform duration-500"
+                            />
+                          </div>
+                          <button className="absolute -top-2 -right-2 w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-white bg-black">
+                            {item.quantity}
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Product Info */}
+                      <div className="flex-1 items-center">
+                        <div className="flex flex-col lg:flex-row justify-between gap-4">
+                          {/* Left Info */}
+                          <div className="flex-1 min-w-0 space-y-3">
+                            {/* Product Name */}
+                            <h3 className="font-semibold text-black leading-tight line-clamp-2 hover:text-gray-500 transition-colors cursor-pointer">
+                              {item.name}
+                            </h3>
+
+                            {/* Price & Size */}
+                            <div className="flex items-center gap-4 flex-wrap">
+                              <div className="flex items-center gap-1">
+                                <TagOutlined className="text-gray-500 text-sm" />
+                                <span className="px-3 py-1 bg-gray-100 text-black rounded-full text-sm font-medium border border-gray-200">
+                                  Size {item.size}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Right Controls */}
+                          <div className="flex flex-col lg:items-end gap-4">
+                            {/* Subtotal */}
+                            <div className="text-right">
+                              <p className="text-lg font-bold text-black">
+                                {formatPrice(item.price * item.quantity)}
+                                {currency}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))
+            : cartItems.map((item: CartItem, index: number) => (
+                <div
+                  key={`${index}`}
+                  className="group relative rounded-sm bg-white border"
+                >
+                  <div className="relative p-6">
+                    <div className="flex flex-col lg:flex-row gap-6">
+                      {/* Product Image */}
+                      <div className="flex-shrink-0">
+                        <div className="relative group/image">
+                          <div className="w-24 h-24 lg:w-28 lg:h-28 rounded-sm overflow-hidden transition-all duration-300">
+                            <img
+                              src={item.image}
+                              alt={item.name}
+                              className="w-full h-full object-cover group-hover/image:scale-105 transition-transform duration-500"
+                            />
+                          </div>
+                          <button className="absolute -top-2 -right-2 w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-white bg-black">
+                            {item.quantity}
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Product Info */}
+                      <div className="flex-1 items-center">
+                        <div className="flex flex-col lg:flex-row justify-between gap-4">
+                          {/* Left Info */}
+                          <div className="flex-1 min-w-0 space-y-3">
+                            {/* Product Name */}
+                            <h3 className="font-semibold text-black leading-tight line-clamp-2 hover:text-gray-500 transition-colors cursor-pointer">
+                              {item.name}
+                            </h3>
+
+                            {/* Price & Size */}
+                            <div className="flex items-center gap-4 flex-wrap">
+                              <div className="flex items-center gap-1">
+                                <TagOutlined className="text-gray-500 text-sm" />
+                                <span className="px-3 py-1 bg-gray-100 text-black rounded-full text-sm font-medium border border-gray-200">
+                                  Size {item.size}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Right Controls */}
+                          <div className="flex flex-col lg:items-end gap-4">
+                            {/* Subtotal */}
+                            <div className="text-right">
+                              <p className="text-lg font-bold text-black">
+                                {formatPrice(item.price * item.quantity)}
+                                {currency}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+          <div className="bg-white rounded-2xl p-6">
+            <CartTotal />
+          </div>
         </div>
       </div>
     </div>

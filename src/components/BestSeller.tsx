@@ -41,9 +41,11 @@ const BestSeller = () => {
               <ProductItem
                 key={index}
                 id={item.id}
-                image={item.image}
+                image={item.image.split(",")[0]}
                 name={item.name}
                 price={item.price}
+                sizes={item.sizes}
+                description={item.description}
               />
             ))}
           </div>

@@ -1,22 +1,36 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { ShopContext } from "../context/ShopContext";
 import Title from "../components/Title";
 import CartTotal from "../components/CartTotal";
 import { useNavigate } from "react-router-dom";
 import {
+  CheckCircleOutlined,
   DeleteOutlined,
+  EditOutlined,
   HeartOutlined,
   MinusOutlined,
+  PhoneOutlined,
   PlusOutlined,
   TagOutlined,
 } from "@ant-design/icons";
 import { formatPrice } from "../utils/FormatPrice";
 import { CartItem } from "common/models/order";
+import ProductCartModal from "components/ProductCartModal";
 
 const Cart = () => {
-  const { currency, cartItems, addToCart, removeFromCart, decrementFromCart, getCartAmount } =
-    useContext(ShopContext);
+  const {
+    currency,
+    cartItems,
+    addToCart,
+    removeFromCart,
+    decrementFromCart,
+    getCartAmount,
+    clearItemBuyNow
+  } = useContext(ShopContext);
   const navigate = useNavigate();
+
+  const [visible, setVisible] = useState(true);
+  const [itemUpdate, setItemUpdate] = useState<CartItem>();
 
   const handleClick = (route: string) => {
     navigate(route);
@@ -26,7 +40,7 @@ const Cart = () => {
   return (
     <div className="border-t pt-14 px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]">
       {cartItems.length === 0 ? (
-        <div className="text-center mt-24">
+        <div className="text-center mt-24 h-screen">
           <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-gray-100 to-gray-300 rounded-full flex items-center justify-center">
             <div className="text-4xl">🛒</div>
           </div>
@@ -117,10 +131,20 @@ const Cart = () => {
 
                           {/* Product details */}
                           <div className="flex items-center gap-4 text-sm text-gray-500">
-                            <span className="flex items-center gap-1">
-                              <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                              In Stock
+                            <div className="relative flex items-center justify-center">
+                              <span className="absolute inline-flex h-4 w-4 rounded-full bg-green-500 opacity-75 animate-[ping_1s_linear_infinite]"></span>
+                              <CheckCircleOutlined className="relative text-green-600 text-lg bg-white rounded-full" />
+                            </div>
+                            <span className="text-green-600 font-medium">
+                              In stock
                             </span>
+                            <EditOutlined
+                              onClick={() => {
+                                setItemUpdate(item);
+                                setVisible(true);
+                              }}
+                              className="relative text-black text-lg bg-white rounded-full"
+                            />
                           </div>
                         </div>
 
@@ -189,8 +213,10 @@ const Cart = () => {
               {getCartAmount() > 0 && (
                 <div className="w-full text-end">
                   <button
-                    onClick={() => handleClick("/place-order")}
-                    className="bg-black text-white text-sm my-8 px-8 py-3 rounded-sm"
+                    onClick={() => {handleClick("/place-order")
+                      clearItemBuyNow()
+                    }}
+                    className="bg-black text-white text-sm my-8 px-8 py-3 rounded-sm border border-black transition-colors duration-300 hover:text-black hover:bg-white"
                   >
                     PROCEED TO CHECKOUT
                   </button>
@@ -199,6 +225,17 @@ const Cart = () => {
             </div>
           </div>
         </>
+      )}
+
+      {itemUpdate && (
+        <ProductCartModal
+          item={itemUpdate}
+          open={visible}
+          onClose={() => {
+            setItemUpdate(undefined);
+            setVisible(!visible);
+          }}
+        />
       )}
     </div>
   );

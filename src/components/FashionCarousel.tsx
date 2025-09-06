@@ -9,12 +9,18 @@ const images = [img1, img2, img3, img4, img5];
 
 export default function FashionCarousel() {
   return (
-    <div className="overflow-hidden w-full bg-white mt-20">
+    <div className="overflow-hidden w-full bg-white mt-10 sm:mt-16 lg:mt-20">
       <div className="flex animate-slide-group">
         {[...images, ...images].map((src, index) => (
           <div
             key={index}
-            className="w-[20vw] h-[40vh] flex-shrink-0 flex justify-center items-center"
+            className="
+              flex-shrink-0 flex justify-center items-center
+              basis-1/2 h-40
+              sm:basis-1/3 sm:h-52
+              md:basis-1/4 md:h-64
+              lg:basis-1/5 lg:h-72
+            "
           >
             <img
               src={src}

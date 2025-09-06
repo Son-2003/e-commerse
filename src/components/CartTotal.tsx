@@ -4,7 +4,8 @@ import Title from "./Title";
 import { formatPrice } from "../utils/FormatPrice";
 
 const CartTotal = () => {
-  const { currency, delivery_fee, getCartAmount } = useContext(ShopContext);
+  const { currency, delivery_fee, getCartAmount, cartItems, cartItemBuyNow } =
+    useContext(ShopContext);
 
   return (
     <div className="w-full">
@@ -13,9 +14,18 @@ const CartTotal = () => {
       </div>
       <div className="flex flex-col gap-2 mt-2 text-sm">
         <div className="flex justify-between">
-          <p className="text-lg">SubTotal</p>
           <p className="text-lg">
-            {formatPrice(getCartAmount())} {currency}
+            SubTotal -{" "}
+            {cartItemBuyNow.length > 0
+              ? cartItemBuyNow.length
+              : cartItems.length}{" "}
+            items
+          </p>
+          <p className="text-lg">
+            {cartItemBuyNow.length > 0
+              ? formatPrice(cartItemBuyNow[0].price)
+              : formatPrice(getCartAmount())}
+            {currency}
           </p>
         </div>
         <hr />
@@ -28,11 +38,13 @@ const CartTotal = () => {
         </div>
         <hr />
         <div className="flex justify-between">
-          <b className="text-lg">Total</b>
-          <b className="text-lg">
-            {formatPrice(
-              getCartAmount() === 0 ? 0 : getCartAmount() + delivery_fee
-            )}
+          <b className="text-xl">Total</b>
+          <b className="text-xl">
+            {cartItemBuyNow.length > 0
+              ? formatPrice(cartItemBuyNow[0].price + 10)
+              : formatPrice(
+                  getCartAmount() === 0 ? 0 : getCartAmount() + delivery_fee
+                )}
             {currency}
           </b>
         </div>

@@ -44,8 +44,6 @@ const OrderSuccess = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  console.log(orderAdded);
-
   return (
     <div className="min-h-screen bg-white">
       <div ref={orderRef} className="container mx-auto px-4 py-8">

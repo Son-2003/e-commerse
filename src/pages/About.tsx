@@ -4,7 +4,7 @@ import NewsletterBox from "../components/NewsletterBox";
 
 const About = () => {
   return (
-    <div className="p-14 px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]">
+    <div className="p-14 px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw] h-screen">
       <div className="text-2xl text-center pt-8">
         <Title text1={"ABOUT"} text2={"US"} />
       </div>

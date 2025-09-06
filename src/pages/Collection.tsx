@@ -101,7 +101,7 @@ const Collection = () => {
   }, [products]);
 
   return (
-    <div className="flex flex-col sm:flex-row gap-1 sm:gap-10 pt-10 px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]">
+    <div className="flex flex-col sm:flex-row gap-1 sm:gap-10 pt-10 px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw] h-screen">
       {/* Filter Sidebar */}
       <div className="min-w-60">
         <div className="rounded-xl pb-5">
@@ -192,34 +192,57 @@ const Collection = () => {
               </select>
             </div>
 
-            {/* Map Products */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 gap-y-6">
-              {filterProducts.map((item, index) => (
-                <ProductItem
-                  key={index}
-                  id={item.id}
-                  image={item.image}
-                  name={item.name}
-                  price={item.price}
-                />
-              ))}
-            </div>
-            {/* Pagination */}
-            <div className="flex justify-center mt-8">
-              <Pagination
-                current={currentPage}
-                pageSize={pageSize}
-                defaultCurrent={1}
-                total={products.totalElements}
-                onChange={(page, size) => {
-                  setCurrentPage(page);
-                  setPageSize(size);
-                }}
-                showSizeChanger={false}
-                showLessItems
-                responsive
-              />
-            </div>
+            {filterProducts.length > 0 ? (
+              <>
+                {/* Map Products */}
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 gap-y-6">
+                  {filterProducts.map((item, index) => (
+                    <ProductItem
+                      key={index}
+                      id={item.id}
+                      image={item.image.split(",")[0]}
+                      name={item.name}
+                      price={item.price}
+                      sizes={item.sizes}
+                      description={item.description}
+                    />
+                  ))}
+                </div>
+                {/* Pagination */}
+                <div className="flex justify-center mt-8">
+                  <Pagination
+                    current={currentPage}
+                    pageSize={pageSize}
+                    defaultCurrent={1}
+                    total={products.totalElements}
+                    onChange={(page, size) => {
+                      setCurrentPage(page);
+                      setPageSize(size);
+                    }}
+                    showSizeChanger={false}
+                    showLessItems
+                    responsive
+                  />
+                </div>
+              </>
+            ) : (
+              <div className="flex flex-col h-full items-center justify-center py-12 text-center">
+                <svg
+                  className="w-12 h-12 text-gray-300 mb-3"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M9 13h6m-3-3v6m9-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                <p className="text-gray-500 text-sm">Don't have any products</p>
+              </div>
+            )}
           </>
         )}
       </div>

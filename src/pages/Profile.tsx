@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import {
   UserOutlined,
   ShoppingOutlined,
@@ -10,18 +10,15 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@redux/store";
 import { logoutUserThunk } from "@redux/thunk/authThunk";
 import { logout } from "@redux/slices/authSlice";
-import { useNavigate } from "react-router-dom";
-import LoadingSpinner from "components/LoadingSpinner";
-import { getAllOrdersThunk } from "@redux/thunk/orderThunk";
+import { useNavigate, useParams } from "react-router-dom";
 
 const Profile = () => {
-  const [activeTab, setActiveTab] = useState("profile");
+  const { tab } = useParams();
+  const [activeTab, setActiveTab] = useState(tab);
   const { userInfo } = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
-  const { orders, loadingOrder } = useSelector(
-    (state: RootState) => state.order
-  );
+  const { orders } = useSelector((state: RootState) => state.order);
 
   const handleLogout = useCallback(() => {
     dispatch(logoutUserThunk());
@@ -30,7 +27,7 @@ const Profile = () => {
     navigate("/");
   }, [dispatch]);
   return (
-    <div className="flex items-start justify-center py-5 px-4 sm:px-6 lg:px-8">
+    <div className="flex items-start justify-center py-5 px-4 sm:px-6 lg:px-8 h-screen">
       <div className="w-full max-w-6xl bg-white rounded-sm overflow-hidden shadow-lg border border-gray-100 grid grid-cols-1 lg:grid-cols-4">
         {/* Redesigned Sidebar */}
         <aside className="lg:col-span-1 bg-gradient-to-b from-gray-50 to-white border-r border-gray-200 hidden lg:block">

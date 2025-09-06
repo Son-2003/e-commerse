@@ -83,13 +83,13 @@ const App = () => {
           <Route path="/place-order" element={<PlaceOrder />} />
           <Route path="/success" element={<OrderSuccess />} />
           <Route
-            path="/profile"
+            path="/profile/:tab"
             element={
               <ProtectedRoute>
                 <Profile />
               </ProtectedRoute>
             }
-          />
+          />         
         </Routes>
       </main>
 

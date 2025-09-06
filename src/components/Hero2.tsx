@@ -20,7 +20,7 @@ const Hero2 = () => {
         </div>
 
         {/* Right Content */}
-        <div className="w-full sm:w-1/3 flex items-center justify-center bg-white px-6 sm:px-10 py-12 sm:py-0">
+        <div className="w-full sm:w-1/3 flex items-center justify-center bg-white px-6 sm:px-10 py-20 sm:py-0">
           <div className="text-center sm:text-left space-y-6">
             <div className="flex items-center gap-2 justify-center sm:justify-start">
               <span className="w-10 h-[2px] bg-gray-800"></span>
@@ -33,7 +33,7 @@ const Hero2 = () => {
               Latest <br /> Arrivals
             </h1>
 
-            <button className="mt-4 px-8 py-3 border border-gray-800 text-gray-900 font-medium tracking-wide rounded-full hover:bg-black hover:text-white transition">
+            <button className="mt-4 px-8 py-3 border border-gray-800 text-gray-900 font-medium tracking-wide rounded-sm hover:bg-black hover:text-white transition">
               SHOP NOW
             </button>
           </div>

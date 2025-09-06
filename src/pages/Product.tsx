@@ -1,12 +1,15 @@
 import { useContext, useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { ShopContext } from "../context/ShopContext";
-import { assets } from "../assets/assets";
 import RelatedProducts from "../components/RelatedProducts";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@redux/store";
 import { getProductThunk } from "@redux/thunk/productThunk";
 import {
+  CheckCircleFilled,
+  CheckCircleOutlined,
+  HeartFilled,
+  HeartOutlined,
   MinusOutlined,
   PlusOutlined,
   StarFilled,
@@ -31,21 +34,29 @@ const Product = () => {
   const { feedbacks, feedbackSummary, loadingFeedback } = useSelector(
     (state: RootState) => state.feedback
   );
-  const { currency, addToCart } = useContext(ShopContext);
+  const { currency, addToCart, addItemToBuyNow } = useContext(ShopContext);
   const [image, setImage] = useState<string>("");
   const [size, setSize] = useState<string>("");
   const [quantity, setQuantity] = useState<number>(1);
-  const [error, setError] = useState<string>("");
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showSuccessBuyNow, setShowSuccessBuyNow] = useState(false);
   const [activeTab, setActiveTab] = useState("description");
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [selectedRating, setSelectedRating] = useState("all");
+  const [liked, setLiked] = useState(false);
+  const navigate = useNavigate();
 
   const searchRequest: SearchFeedbackRequest = {
     statuses: [EntityStatus.ACTIVE],
     productId: Number(productId),
   };
+
+  useEffect(() => {
+    if (productDetail?.sizes) {
+      setSize(productDetail?.sizes[0].name);
+    }
+  }, [productDetail]);
 
   useEffect(() => {
     dispatch(getProductThunk(Number(productId)));
@@ -84,39 +95,51 @@ const Product = () => {
     }
   }, [productDetail]);
 
+  const handleClick = (route: string) => {
+    navigate(route);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   const handleAddToCart = () => {
-    if (size === "") {
-      setError("Please select size first");
-    } else {
-      addToCart({
-        id: productDetail?.id,
-        name: productDetail?.name,
-        quantity: quantity,
-        price: productDetail?.price,
-        image: productDetail?.image.split(",")[0],
-        size: size,
-      });
-      setShowSuccess(true);
+    addToCart({
+      id: productDetail?.id,
+      name: productDetail?.name,
+      quantity: quantity,
+      price: productDetail?.price,
+      image: productDetail?.image.split(",")[0],
+      size: size,
+      sizes: productDetail?.sizes,
+    });
+    setShowSuccess(true);
 
-      setTimeout(() => {
-        setShowSuccess(false);
-      }, 2000);
-    }
+    setTimeout(() => {
+      setShowSuccess(false);
+    }, 2000);
   };
 
-  const handleSelectSize = (sizeSelected: string) => {
-    if (size === sizeSelected) {
-      setSize("");
-    } else {
-      setError("");
-      setSize(sizeSelected);
-    }
+  const handleBuyNow = () => {
+    addItemToBuyNow({
+      id: productDetail?.id,
+      name: productDetail?.name,
+      quantity: quantity,
+      price: productDetail?.price,
+      image: productDetail?.image.split(",")[0],
+      size: size,
+      sizes: productDetail?.sizes,
+    });
+    setShowSuccessBuyNow(true);
+
+    setTimeout(() => {
+      setShowSuccessBuyNow(false);
+      handleClick("/place-order");
+    }, 500);
   };
+  const toggleLike = () => setLiked(!liked);
 
   const rating = Math.round(feedbackSummary?.averageRating || 0);
 
   return productDetail ? (
-    <div className="border-t-2 pt-2 transition-opacity ease-in duration-500 opacity-100 px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]">
+    <div className="pt-2 transition-opacity ease-in duration-500 opacity-100 px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]">
       {/* Product Data */}
       <div className="flex gap-12 sm:gap-12 flex-col sm:flex-row">
         {/* Product Images */}
@@ -137,96 +160,136 @@ const Product = () => {
         </div>
 
         {/* Product Info */}
-        <div className="flex-1">
-          <h1 className="font-medium text-2xl mt-2">{productDetail.name}</h1>
-          <div className="flex items-center gap-1 mt-2">
-            {Array.from({ length: 5 }).map((_, index) =>
-              index < rating ? (
-                <StarFilled key={index} className="text-yellow-300" />
-              ) : (
-                <StarOutlined key={index} className="text-gray-300" />
-              )
-            )}
-            <p className="pl-2 text-sm">({feedbackSummary?.totalFeedback})</p>
-          </div>
-          <p className="mt-5 text-3xl font-medium">
-            {formatPrice(productDetail.price)}
-            {currency}
-          </p>
-          <p className="mt-5 text-gray-500 md:w-4/5">
-            {productDetail.description}
-          </p>
-
-          <div className="flex flex-col gap-4 my-8">
-            <p>Select Size</p>
-            <div className="flex-col gap-2">
-              {productDetail.sizes.map((item, index) => (
-                <button
-                  onClick={() => handleSelectSize(item.name)}
-                  className={`border py-2 px-4 mb-3 rounded-sm bg-gray-100 ${
-                    item.name === size ? "border-gray-500" : ""
-                  }`}
-                  key={index}
-                >
-                  {item.name}
-                </button>
-              ))}
-              <p className={` text-red-500`}>{error}</p>
+        <div className="flex-1 flex-col">
+          <div className="w-full sm:max-w-lg inline-flex flex-col">
+            <h1 className="font-medium text-2xl">{productDetail.name}</h1>
+            <div className="flex items-center gap-1 mt-3">
+              {Array.from({ length: 5 }).map((_, index) =>
+                index < rating ? (
+                  <StarFilled key={index} className="text-yellow-300" />
+                ) : (
+                  <StarOutlined key={index} className="text-gray-300" />
+                )
+              )}
+              <p className="pl-2 text-sm">({feedbackSummary?.totalFeedback})</p>
             </div>
-          </div>
+            <p className="mt-3 text-3xl font-medium">
+              {formatPrice(productDetail.price)}
+              {currency}
+            </p>
 
-          <div className="flex gap-2">
-            <div className="flex items-center gap-1 bg-gray-100 rounded-sm p-1 border border-gray-200 ">
-              <button
-                onClick={() => setQuantity(quantity - 1)}
-                className="w-8 h-8 rounded-sm flex items-center justify-center text-gray-500 hover:text-black transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={quantity <= 1}
-              >
-                <MinusOutlined className="text-xs" />
-              </button>
-
-              <div className="w-12 h-8 flex items-center justify-center">
-                <input
-                  type="text"
-                  min="1"
-                  value={quantity}
-                  onChange={(e) => {
-                    const newQuantity = parseInt(e.target.value);
-                    if (!isNaN(newQuantity) && newQuantity >= 1) {
-                      setQuantity(newQuantity);
-                    } else if (e.target.value === "") {
-                      setQuantity(1);
-                    }
-                  }}
-                  className="w-full h-full text-center text-sm font-semibold bg-transparent border-none outline-none"
-                />
+            <div className="flex items-center gap-2 mt-5">
+              <div className="relative flex items-center justify-center">
+                <span className="absolute inline-flex h-4 w-4 rounded-full bg-green-500 opacity-75 animate-[ping_1s_linear_infinite]"></span>
+                <CheckCircleOutlined className="relative text-green-600 text-lg bg-white rounded-full" />
               </div>
+              <span className="text-green-600 font-medium">In stock</span>
+            </div>
 
+            <p className="mt-5 text-gray-500 md:w-full">
+              {productDetail.description}
+            </p>
+
+            <div className="flex flex-col gap-4 my-8">
+              <p>Size: {size}</p>
+              <div className="flex gap-2">
+                {productDetail.sizes.map((item, index) => (
+                  <button
+                    onClick={() => setSize(item.name)}
+                    className={`border px-4 py-2 rounded-sm border-black ${
+                      item.name === size ? "bg-black text-white" : ""
+                    }`}
+                    key={index}
+                  >
+                    {item.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="flex gap-2 w-full">
+              <div className="flex items-center gap-1 rounded-sm p-1 border border-black">
+                <button
+                  onClick={() => setQuantity(quantity - 1)}
+                  className="w-8 h-8 rounded-sm flex items-center justify-center hover:text-black transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={quantity <= 1}
+                >
+                  <MinusOutlined className="text-xs" />
+                </button>
+
+                <div className="w-10 h-8 flex items-center justify-center">
+                  <input
+                    type="text"
+                    min="1"
+                    value={quantity}
+                    onChange={(e) => {
+                      const newQuantity = parseInt(e.target.value);
+                      if (!isNaN(newQuantity) && newQuantity >= 1) {
+                        setQuantity(newQuantity);
+                      } else if (e.target.value === "") {
+                        setQuantity(1);
+                      }
+                    }}
+                    className="w-full h-full text-center text-sm font-semibold bg-transparent border-none outline-none"
+                  />
+                </div>
+
+                <button
+                  onClick={() => setQuantity(quantity + 1)}
+                  className="w-8 h-8 rounded-sm flex items-center justify-center text-gray-500 hover:text-black transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <PlusOutlined className="text-xs" />
+                </button>
+              </div>
               <button
-                onClick={() => setQuantity(quantity + 1)}
-                className="w-8 h-8 rounded-sm flex items-center justify-center text-gray-500 hover:text-black transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className={`rounded-sm sm:px-16 w-full text-sm font-medium transition-all duration-300 border border-black ${
+                  showSuccess
+                    ? "bg-white text-black border border-black"
+                    : "bg-black text-white hover:bg-white hover:text-black"
+                }`}
+                onClick={() => handleAddToCart()}
+                disabled={showSuccess}
               >
-                <PlusOutlined className="text-xs" />
+                {showSuccess ? "✓ ADDED" : "ADD TO CART"}
               </button>
+              <div className="border border-black rounded-sm flex items-center justify-center bg-white">
+                <button
+                  onClick={toggleLike}
+                  className="relative flex items-center justify-center p-4"
+                >
+                  <HeartOutlined
+                    className={`transition-transform duration-300 text-lg ${
+                      liked
+                        ? "opacity-0 scale-0"
+                        : "opacity-100 scale-100 hover:scale-110"
+                    }`}
+                  />
+                  <HeartFilled
+                    className={`text-red-500 text-lg absolute transition-transform duration-300 ${
+                      liked
+                        ? "opacity-100 scale-100 hover:scale-110"
+                        : "opacity-0 scale-0"
+                    }`}
+                  />
+                </button>
+              </div>
             </div>
             <button
-              className={`rounded-sm px-8 py-3 text-sm font-medium transition-all duration-300 ${
-                showSuccess
-                  ? "bg-green-600 text-white"
-                  : "bg-black text-white hover:bg-gray-800 active:bg-gray-700"
+              className={`rounded-sm mt-5 w-full px-8 py-4 text-sm font-medium transition-all duration-300 border border-black ${
+                showSuccessBuyNow
+                  ? "bg-white text-black border border-black"
+                  : "bg-black text-white hover:bg-white hover:text-black"
               }`}
-              onClick={() => handleAddToCart()}
-              disabled={showSuccess}
+              onClick={() => handleBuyNow()}
+              disabled={showSuccessBuyNow}
             >
-              {showSuccess ? "✓ ADDED" : "ADD TO CART"}
+              {showSuccessBuyNow ? "✓ BOUGHT IT" : "BUY IT NOW"}
             </button>
-          </div>
-
-          <hr className="mt-8 sm:w-4/5" />
-          <div className="text-sm text-gray-500 mt-5 flex flex-col gap-1">
-            <p>100% Original product.</p>
-            <p>Cash on delivery is available on this product.</p>
-            <p>Easy return and exchange policy within 7 days.</p>
+            <hr className="mt-8 sm:w-4/5" />
+            <div className="text-sm text-gray-500 mt-5 flex flex-col gap-1">
+              <p>100% Original product.</p>
+              <p>Cash on delivery is available on this product.</p>
+              <p>Easy return and exchange policy within 7 days.</p>
+            </div>
           </div>
         </div>
       </div>
@@ -308,24 +371,6 @@ const Product = () => {
                       relevant information, providing accessibility and
                       convenience for customers worldwide.
                     </p>
-                  </div>
-                </div>
-
-                <div className="border-t border-gray-100 pt-6">
-                  <div className="flex flex-wrap gap-2">
-                    {[
-                      "Premium Quality",
-                      "Fast Shipping",
-                      "Secure Payment",
-                      "Customer Support",
-                    ].map((tag, index) => (
-                      <span
-                        key={index}
-                        className="px-3 py-1 bg-black text-white text-xs font-medium rounded-full"
-                      >
-                        {tag}
-                      </span>
-                    ))}
                   </div>
                 </div>
               </div>

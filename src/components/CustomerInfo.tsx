@@ -176,7 +176,7 @@ const CustomerInfo: React.FC<CustomerInfoProps> = ({
   return (
     <>
       {/* main card */}
-      <div className="bg-white rounded-2xl overflow-hidden shadow-sm w-full">
+      <div className="bg-white rounded-sm overflow-hidden shadow-sm w-full">
         {/* header */}
         <div className="flex flex-col sm:flex-row sm:items-center gap-4 p-6 border-b">
           <div className="flex items-center gap-4 min-w-0">
@@ -189,7 +189,7 @@ const CustomerInfo: React.FC<CustomerInfoProps> = ({
             </div>
 
             <div className="min-w-0">
-              <h2 className="text-lg sm:text-2xl font-semibold text-gray-800 truncate">
+              <h2 className="text-lg sm:text-sm font-semibold text-gray-800 truncate">
                 {fullname ?? ""}
               </h2>
 
@@ -257,12 +257,12 @@ const CustomerInfo: React.FC<CustomerInfoProps> = ({
           <div className="min-w-0">
             <h3 className="text-sm text-gray-500">Activity</h3>
             <div className="mt-3 space-y-3 text-gray-700">
-              <div className="bg-gray-50 rounded-lg p-3">
+              <div className="bg-gray-50 rounded-sm p-3">
                 <p className="text-sm text-gray-500">Orders</p>
                 <p className="text-lg font-semibold text-gray-800 mt-1">{orderInfo?.numberOfOrder}</p>
               </div>
 
-              <div className="bg-gray-50 rounded-lg p-3">
+              <div className="bg-gray-50 rounded-sm p-3">
                 <p className="text-sm text-gray-500">Total spent</p>
                 <p className="text-lg font-semibold text-gray-800 mt-1">
                   {formatPrice(orderInfo?.totalPrice!)}{currency}
@@ -282,7 +282,7 @@ const CustomerInfo: React.FC<CustomerInfoProps> = ({
             onClick={() => setIsEditing(false)}
           />
           {/* modal */}
-          <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-md p-6 animate-scaleIn">
+          <div className="relative bg-white rounded-sm shadow-xl w-full max-w-md p-6 animate-scaleIn">
             <h3 className="text-lg font-semibold mb-5">Edit customer info</h3>
             <div className="space-y-4">
               {/* avatar edit */}
@@ -343,7 +343,7 @@ const CustomerInfo: React.FC<CustomerInfoProps> = ({
                     placeholder="Enter your full name"
                     value={form.fullname}
                     onChange={handleChange}
-                    className="w-full border rounded-lg px-3 py-2 text-sm outline-none pr-10"
+                    className="w-full border rounded-sm px-3 py-2 text-sm outline-none pr-10"
                   />
                   <span className="absolute right-3 top-1/2 -translate-y-1/2">
                     {!form.fullname?.length ? (
@@ -365,7 +365,7 @@ const CustomerInfo: React.FC<CustomerInfoProps> = ({
                     placeholder="Enter your phone"
                     value={formatPhone(form.phone)}
                     onChange={handleChange}
-                    className="w-full border rounded-lg px-3 py-2 text-sm outline-none pr-10"
+                    className="w-full border rounded-sm px-3 py-2 text-sm outline-none pr-10"
                   />
                   <span className="absolute right-3 top-1/2 -translate-y-1/2">
                     {!isValidPhone(form.phone) ? (
@@ -387,7 +387,7 @@ const CustomerInfo: React.FC<CustomerInfoProps> = ({
                     value={form.address}
                     onChange={handleChange}
                     placeholder="Enter your address (e.g. 123 Nguyen Trai, Hanoi)"
-                    className="w-full border rounded-lg px-3 py-2 text-sm outline-none pr-10"
+                    className="w-full border rounded-sm px-3 py-2 text-sm outline-none pr-10"
                   />
                   <span className="absolute right-3 top-1/2 -translate-y-1/2">
                     {!form.address.length ? (
@@ -399,7 +399,7 @@ const CustomerInfo: React.FC<CustomerInfoProps> = ({
                 </div>
 
                 {form.address?.length > 2 && suggestions.length > 0 && (
-                  <ul className="absolute left-0 right-0 z-50 bg-white border rounded-lg shadow mt-1 max-h-40 overflow-y-auto">
+                  <ul className="absolute left-0 right-0 z-50 bg-white border rounded-sm shadow mt-1 max-h-40 overflow-y-auto">
                     {suggestions.map((item, idx) => (
                       <li
                         key={idx}
@@ -465,14 +465,14 @@ const CustomerInfo: React.FC<CustomerInfoProps> = ({
                     phone: phone ?? "",
                   });
                 }}
-                className="px-4 py-2 text-sm border rounded-lg hover:bg-gray-50"
+                className="px-4 py-2 text-sm border rounded-sm hover:bg-gray-50"
               >
                 Cancel
               </button>
               <button
                 disabled={loadingUser || uploadingImage || isValid}
                 onClick={() => handleSave()}
-                className={`px-4 py-2 text-sm text-white rounded-lg ${
+                className={`px-4 py-2 text-sm text-white rounded-sm ${
                   isValid ? "bg-gray-500" : "bg-black hover:opacity-90"
                 }`}
               >

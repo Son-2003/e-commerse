@@ -4,7 +4,7 @@ import NewsletterBox from "../components/NewsletterBox";
 
 const Contact = () => {
   return (
-    <div className="text-center px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]">
+    <div className="text-center px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw] h-screen">
       <div className="text-2xl text-center pt-8">
         <Title text1={"CONTACT"} text2={"US"} />
       </div>
