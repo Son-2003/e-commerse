@@ -24,6 +24,20 @@ const signInUser = async (
   }
 };
 
+const signInAdmin = async (
+  credentials: SignInRequest
+): Promise<JWTAuthResponse> => {
+  try {
+    const response = await axios.post<JWTAuthResponse>(
+      `${API_BASE_URL}/auth/login/admin`,
+      credentials
+    );
+    return response.data;
+  } catch (error: any) {
+    throw error;
+  }
+};
+
 const signUpCustomer = async (
   credentials: SignUpRequest
 ): Promise<JWTAuthResponse> => {
@@ -124,6 +138,7 @@ const refreshToken = async (refreshToken: string): Promise<JWTAuthResponse> => {
 
 export default {
   signInUser,
+  signInAdmin,
   signUpCustomer,
   signUpStaff,
   getInfo,

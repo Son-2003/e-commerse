@@ -5,6 +5,7 @@ import userReducer from "./slices/userSlice";
 import orderReducer from "./slices/orderSlice";
 import feedbackReducer from "./slices/feedbackSlice";
 import paymentReducer from "./slices/paymentSlice";
+import chatReducer from "./slices/chatSlice";
 
 const store = configureStore({
   reducer: {
@@ -14,6 +15,7 @@ const store = configureStore({
     order: orderReducer,
     feedback: feedbackReducer,
     payment: paymentReducer,
+    chat: chatReducer,
   },
 });
 

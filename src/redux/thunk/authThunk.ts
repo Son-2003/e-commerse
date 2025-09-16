@@ -21,6 +21,22 @@ export const signInUserThunk = createAsyncThunk<
   }
 );
 
+export const signInAdminThunk = createAsyncThunk<
+  JWTAuthResponse,
+  SignInRequest
+>(
+  "auth/signInAdmin",
+
+  async (credentials, thunkAPI) => {
+    try {
+      const data = await AuthService.signInAdmin(credentials);      
+      return data;
+    } catch (error: any) {
+      return thunkAPI.rejectWithValue(error.response?.data?.message || "Sign in failed");
+    }
+  }
+);
+
 export const signUpCustomerThunk = createAsyncThunk<JWTAuthResponse, SignUpRequest>(
   "auth/signUpCustomer",
 
@@ -67,13 +83,33 @@ export const getInfoThunk = createAsyncThunk<
   }
 });
 
+export const getInfoAdminThunk = createAsyncThunk<
+  UserResponse,
+  void,
+  { state: RootState }
+>("auth/getInfoAdmin", async (_, thunkAPI) => {
+  const state = thunkAPI.getState();
+  const accessToken = state.auth.accessTokenAdmin;
+  if (!accessToken) {
+    return thunkAPI.rejectWithValue("No access token available");
+  }
+  try {
+    const userInfo = await AuthService.getInfo(accessToken);
+    return userInfo;
+  } catch (error: any) {
+    return thunkAPI.rejectWithValue(
+      error.response?.data || "Get admin info failed"
+    );
+  }
+});
+
 export const logoutUserThunk = createAsyncThunk<
   void,
   void,
   { state: RootState }
 >("auth/logoutUser", async (_, thunkAPI) => {
   const state = thunkAPI.getState();
-  const accessToken = state.auth.accessToken;  
+  const accessToken = state.auth.accessToken ? state.auth.accessToken : state.auth.accessTokenAdmin;  
   if (!accessToken) {
     return thunkAPI.rejectWithValue("No access token available log out");
   }
@@ -93,6 +129,18 @@ export const refreshTokenThunk = createAsyncThunk<
       return data;
     } catch (error: any) {
       return thunkAPI.rejectWithValue(error.response?.data?.message || "Refresh token failed");
+    }
+});
+
+export const refreshTokenAdminThunk = createAsyncThunk<
+  JWTAuthResponse,
+  string
+>("auth/refreshTokenAdmin", async (credentials, thunkAPI) => {
+  try {
+      const data = await AuthService.refreshToken(credentials);      
+      return data;
+    } catch (error: any) {
+      return thunkAPI.rejectWithValue(error.response?.data?.message || "Refresh token admin failed");
     }
 });
 

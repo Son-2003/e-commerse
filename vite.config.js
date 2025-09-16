@@ -13,4 +13,7 @@ export default defineConfig({
       pages: path.resolve(__dirname, "src/pages"),
     },
   },
+  define: {
+    global: "window",
+  },
 });

@@ -7,9 +7,12 @@ import { JWTAuthResponse } from "../../common/models/auth";
 import { UserResponse } from "common/models/user";
 import {
   changePasswordThunk,
+  getInfoAdminThunk,
   getInfoThunk,
   logoutUserThunk,
+  refreshTokenAdminThunk,
   refreshTokenThunk,
+  signInAdminThunk,
   signInUserThunk,
   signUpCustomerThunk,
   signUpStaffThunk,
@@ -18,7 +21,10 @@ import {
 export interface AuthState {
   accessToken: string | null;
   refreshToken: string | null;
+  accessTokenAdmin: string | null;
+  refreshTokenAdmin: string | null;
   userInfo: UserResponse | null;
+  adminInfo: UserResponse | null;
   changePasswordSuccess: boolean | null;
   loadingAuth: boolean;
   errorAuth: string | null;
@@ -27,7 +33,10 @@ export interface AuthState {
 const initialState: AuthState = {
   accessToken: null,
   refreshToken: null,
+  accessTokenAdmin: null,
+  refreshTokenAdmin: null,
   userInfo: null,
+  adminInfo: null,
   changePasswordSuccess: null,
   loadingAuth: false,
   errorAuth: null,
@@ -57,7 +66,10 @@ const authSlice = createSlice({
     logout(state) {
       state.accessToken = null;
       state.refreshToken = null;
+      state.accessTokenAdmin = null;
+      state.refreshTokenAdmin = null;
       state.userInfo = null;
+      state.adminInfo = null;
       state.changePasswordSuccess = null;
       state.loadingAuth = false;
       state.errorAuth = null;
@@ -65,12 +77,15 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     signInUser(builder);
+    signInAdmin(builder);
     signUpCustomer(builder);
     signUpStaff(builder);
     getInfo(builder);
+    getInfoAdmin(builder);
     logoutUser(builder);
     changePassword(builder);
     refreshToken(builder);
+    refreshTokenAdmin(builder);
   },
 });
 
@@ -89,6 +104,26 @@ function signInUser(builder: ActionReducerMapBuilder<AuthState>) {
       }
     )
     .addCase(signInUserThunk.rejected, (state, action: PayloadAction<any>) => {
+      state.loadingAuth = false;
+      state.errorAuth = action.payload || "Sign in failed";
+    });
+}
+
+function signInAdmin(builder: ActionReducerMapBuilder<AuthState>) {
+  builder
+    .addCase(signInAdminThunk.pending, (state) => {
+      state.loadingAuth = true;
+      state.errorAuth = null;
+    })
+    .addCase(
+      signInAdminThunk.fulfilled,
+      (state, action: PayloadAction<JWTAuthResponse>) => {
+        state.loadingAuth = false;
+        state.accessTokenAdmin = action.payload.accessToken || null;
+        state.accessTokenAdmin = action.payload.refreshToken || null;
+      }
+    )
+    .addCase(signInAdminThunk.rejected, (state, action: PayloadAction<any>) => {
       state.loadingAuth = false;
       state.errorAuth = action.payload || "Sign in failed";
     });
@@ -156,6 +191,25 @@ function getInfo(builder: ActionReducerMapBuilder<AuthState>) {
     });
 }
 
+function getInfoAdmin(builder: ActionReducerMapBuilder<AuthState>) {
+  builder
+    .addCase(getInfoAdminThunk.pending, (state) => {
+      state.loadingAuth = true;
+      state.errorAuth = null;
+    })
+    .addCase(
+      getInfoAdminThunk.fulfilled,
+      (state, action: PayloadAction<UserResponse>) => {
+        state.loadingAuth = false;
+        state.adminInfo = action.payload;
+      }
+    )
+    .addCase(getInfoAdminThunk.rejected, (state, action: PayloadAction<any>) => {
+      state.loadingAuth = false;
+      state.errorAuth = action.payload || "Get admin info failed";
+    });
+}
+
 function logoutUser(builder: ActionReducerMapBuilder<AuthState>) {
   builder
     .addCase(logoutUserThunk.pending, (state) => {
@@ -214,6 +268,29 @@ function refreshToken(builder: ActionReducerMapBuilder<AuthState>) {
     )
     .addCase(
       refreshTokenThunk.rejected,
+      (state, action: PayloadAction<any>) => {
+        state.loadingAuth = false;
+        state.errorAuth = action.payload || "Refresh token failed";
+      }
+    );
+}
+
+function refreshTokenAdmin(builder: ActionReducerMapBuilder<AuthState>) {
+  builder
+    .addCase(refreshTokenAdminThunk.pending, (state) => {
+      state.loadingAuth = true;
+      state.errorAuth = null;
+    })
+    .addCase(
+      refreshTokenAdminThunk.fulfilled,
+      (state, action: PayloadAction<JWTAuthResponse>) => {
+        state.loadingAuth = false;
+        state.accessTokenAdmin = action.payload.accessToken || null;
+        state.refreshTokenAdmin = action.payload.refreshToken || null;
+      }
+    )
+    .addCase(
+      refreshTokenAdminThunk.rejected,
       (state, action: PayloadAction<any>) => {
         state.loadingAuth = false;
         state.errorAuth = action.payload || "Refresh token failed";
