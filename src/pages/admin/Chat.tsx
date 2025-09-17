@@ -92,7 +92,7 @@ const Chat: React.FC = () => {
         ) : (
           <div className="flex-1 flex items-center justify-center bg-white">
             <div className="text-center max-w-md mx-auto px-8">
-              <div className="w-32 h-32 mx-auto mb-8 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-full flex items-center justify-center">
+              <div className="w-32 h-32 mx-auto mb-8 bg-gray-200 rounded-full flex items-center justify-center">
                 <MessageOutlined className="text-5xl" />
               </div>
               <h3 className="text-2xl font-bold text-gray-800 mb-4">

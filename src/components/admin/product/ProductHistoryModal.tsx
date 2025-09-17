@@ -11,7 +11,7 @@ import {
   FileTextOutlined,
   InboxOutlined,
 } from "@ant-design/icons";
-import { StatCard } from "./StatCard";
+import { StatCard } from "../StatCard";
 import { useState } from "react";
 import { ImportHistoryDetail } from "./ImportHistoryDetail";
 

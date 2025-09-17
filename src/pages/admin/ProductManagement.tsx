@@ -15,13 +15,13 @@ import {
   ClearOutlined,
   MoreOutlined,
 } from "@ant-design/icons";
-import { ProductHistoryModal } from "components/admin/ProductHistoryModal";
-import { DailyHistoryModal } from "components/admin/DailyHistoryModal";
+import { ProductHistoryModal } from "components/admin/product/ProductHistoryModal";
+import { DailyHistoryModal } from "components/admin/product/DailyHistoryModal";
 import { DatePicker, Dropdown, Menu, Pagination, Select } from "antd";
 import { OrderStatus } from "common/enums/OrderStatus";
 import { StatCard } from "components/admin/StatCard";
-import { ProductForm } from "components/admin/ProductFormModal";
-import { MultiProductImportModal } from "components/admin/MultiImportModal";
+import { ProductForm } from "components/admin/product/ProductFormModal";
+import { MultiProductImportModal } from "components/admin/product/MultiImportModal";
 
 interface Product {
   id: number;
@@ -438,13 +438,6 @@ export default function ProductManagement(): JSX.Element {
                     const StockIcon = stockStatus.icon;
                     const menu = (
                       <Menu>
-                        {/* <Menu.Item
-                          key="add"
-                          icon={<InboxOutlined />}
-                          onClick={() => setShowAddImportModal(product)}
-                        >
-                          Add stock
-                        </Menu.Item> */}
                         <Menu.Item
                           key="history"
                           icon={<HistoryOutlined />}

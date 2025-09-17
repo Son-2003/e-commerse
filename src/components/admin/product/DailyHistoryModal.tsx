@@ -14,7 +14,7 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 import { useMemo, useState } from "react";
-import { StatCard } from "./StatCard";
+import { StatCard } from "../StatCard";
 import { ImportHistoryDetail } from "./ImportHistoryDetail";
 
 interface ImportHistory {
@@ -93,10 +93,10 @@ export const DailyHistoryModal: React.FC<{
           <div className="p-6 border-b bg-gray-50">
             <div className="flex justify-between items-start">
               <div>
-                <h2 className="text-2xl font-bold text-gray-800">
+                <h2 className="text-2xl font-bold text-black">
                   Daily Import History
                 </h2>
-                <p className="text-gray-600">
+                <p className="text-gray-500">
                   Overview of daily import activities
                 </p>
               </div>
@@ -228,7 +228,7 @@ export const DailyHistoryModal: React.FC<{
                                 <th className="px-4 py-2 text-center text-sm font-semibold"></th>
                               </tr>
                             </thead>
-                            <tbody className="">
+                            <tbody className="divide-y">
                               {items.map((item) => {
                                 const product = products.find(
                                   (p) => p.id === item.productId
@@ -252,7 +252,7 @@ export const DailyHistoryModal: React.FC<{
                                     className="hover:bg-gray-50"
                                   >
                                     <td className="px-4 py-3">
-                                      <div className="flex items-center gap-3">
+                                      <div className="flex items-center justify-center gap-3">
                                         <img
                                           src={product?.image}
                                           alt=""
@@ -314,7 +314,7 @@ export const DailyHistoryModal: React.FC<{
                                         onClick={() =>
                                           setSelectedHistoryItem(item)
                                         }
-                                        className="rounded-sm text-black transition-colors"
+                                        className="rounded-sm p-2 text-black transition-colors"
                                         title="View Details"
                                       >
                                         <EyeOutlined className="p-1.5 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors duration-300" />

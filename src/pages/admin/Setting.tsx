@@ -1,4 +1,4 @@
-// SettingsPage.tsx
+// SettingsPage.Switches.tsx
 import React, { useEffect, useState } from "react";
 import {
   SaveOutlined,
@@ -6,13 +6,17 @@ import {
   UploadOutlined,
   SettingOutlined,
   HomeOutlined,
-  DatabaseOutlined,
   BellOutlined,
-  LinkOutlined,
   TeamOutlined,
   EyeOutlined,
   CloseOutlined,
+  DeleteOutlined,
 } from "@ant-design/icons";
+import { Switch } from "antd";
+// If you don't have global antd CSS, uncomment the appropriate import below (depends on your version):
+// import 'antd/dist/antd.css'; // AntD v4/v5 legacy
+// or for reset-style:
+// import 'antd/dist/reset.css';
 
 type NotificationChannel = "email" | "sms" | "webhook";
 
@@ -56,13 +60,13 @@ interface Settings {
 const LOCAL_KEY = "mngmt_settings_v1";
 
 const defaultSettings: Settings = {
-  companyName: "Công ty Demo",
+  companyName: "Demo Company",
   companyEmail: "hello@demo.com",
-  address: "123 Đường Demo, Quận 1, TP.HCM",
+  address: "123 Demo St, District 1, HCMC",
   phone: "+84 912 345 678",
   logoDataUrl: undefined,
 
-  defaultWarehouse: "Kho Hồ Chí Minh",
+  defaultWarehouse: "HCMC Warehouse",
   lowStockThreshold: 10,
   autoReorder: false,
   autoReorderQuantity: 20,
@@ -96,8 +100,44 @@ function readSettings(): Settings {
   }
 }
 
+/* ----------------- Small UI helpers ----------------- */
+function Section({
+  title,
+  icon,
+  children,
+}: {
+  title: string;
+  icon?: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="bg-white rounded-2xl p-6 shadow-sm border">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="font-semibold text-lg flex items-center gap-3 text-black">
+          {icon}
+          <span>{title}</span>
+        </h2>
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function Label({ children }: { children: React.ReactNode }) {
+  return (
+    <label className="block text-sm font-medium text-black">{children}</label>
+  );
+}
+
+function SmallBadge({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="px-2 py-0.5 text-xs rounded bg-gray-100 text-gray-800">
+      {children}
+    </span>
+  );
+}
+
 export default function SettingsPage(): JSX.Element {
-  // NOTE: outer container is h-screen flex flex-col so inner content can be flex-1 overflow-auto
   const [settings, setSettings] = useState<Settings>(() => readSettings());
   const [dirty, setDirty] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -106,7 +146,7 @@ export default function SettingsPage(): JSX.Element {
 
   useEffect(() => {
     if (!message) return;
-    const t = setTimeout(() => setMessage(null), 3000);
+    const t = setTimeout(() => setMessage(null), 3500);
     return () => clearTimeout(t);
   }, [message]);
 
@@ -133,20 +173,20 @@ export default function SettingsPage(): JSX.Element {
 
   const save = () => {
     if (!settings.companyName || !settings.companyEmail) {
-      setMessage("Vui lòng điền tên công ty và email.");
+      setMessage("Please enter company name and company email.");
       return;
     }
     localStorage.setItem(LOCAL_KEY, JSON.stringify(settings));
     setDirty(false);
-    setMessage("Lưu cấu hình thành công.");
+    setMessage("Settings saved successfully.");
   };
 
   const resetDefaults = () => {
-    if (!confirm("Bạn có chắc muốn reset về mặc định?")) return;
+    if (!confirm("Are you sure you want to reset to defaults?")) return;
     setSettings(defaultSettings);
     localStorage.removeItem(LOCAL_KEY);
     setDirty(false);
-    setMessage("Đã reset về cấu hình mặc định.");
+    setMessage("Reset to default settings.");
   };
 
   const onLogoChange = (file: File | null) => {
@@ -163,72 +203,116 @@ export default function SettingsPage(): JSX.Element {
       const channels = new Set(s.notifications.channels);
       if (channels.has(channel)) channels.delete(channel);
       else channels.add(channel);
-      const next = { ...s, notifications: { ...s.notifications, channels: Array.from(channels) } };
+      const next = {
+        ...s,
+        notifications: { ...s.notifications, channels: Array.from(channels) },
+      };
       setDirty(true);
       return next;
     });
   };
 
   const addUser = () => {
-    const email = prompt("Email người dùng mới:");
+    const email = prompt("New user email:");
     if (!email) return;
-    const newUser: UserRole = { id: `u-${Date.now()}`, email, role: "staff", active: true };
+    const newUser: UserRole = {
+      id: `u-${Date.now()}`,
+      email,
+      role: "staff",
+      active: true,
+    };
     setSettings((s) => ({ ...s, users: [...s.users, newUser] }));
     setDirty(true);
   };
 
   const updateUser = (id: string, patch: Partial<UserRole>) => {
-    setSettings((s) => ({ ...s, users: s.users.map((u) => (u.id === id ? { ...u, ...patch } : u)) }));
+    setSettings((s) => ({
+      ...s,
+      users: s.users.map((u) => (u.id === id ? { ...u, ...patch } : u)),
+    }));
     setDirty(true);
   };
 
   const removeUser = (id: string) => {
-    if (!confirm("Xóa người dùng này?")) return;
+    if (!confirm("Remove this user?")) return;
     setSettings((s) => ({ ...s, users: s.users.filter((u) => u.id !== id) }));
     setDirty(true);
   };
 
   const auditLogs = [
-    { id: 1, date: "2025-09-09 09:12", actor: "admin", action: "Cập nhật lowStockThreshold từ 5 → 10" },
-    { id: 2, date: "2025-09-08 14:50", actor: "manager", action: "Tạo webhook mới" },
-    { id: 3, date: "2025-09-07 11:23", actor: "admin", action: "Tắt autoReorder" },
+    {
+      id: 1,
+      date: "2025-09-09 09:12",
+      actor: "admin",
+      action: "Updated lowStockThreshold 5 → 10",
+    },
+    {
+      id: 2,
+      date: "2025-09-08 14:50",
+      actor: "manager",
+      action: "Created new webhook",
+    },
+    {
+      id: 3,
+      date: "2025-09-07 11:23",
+      actor: "admin",
+      action: "Disabled autoReorder",
+    },
   ];
 
   return (
-    // IMPORTANT: use h-screen flex flex-col so main can scroll
-    <div className="h-screen flex flex-col bg-gray-50">
+    <div className="h-screen flex flex-col bg-white text-black">
+      {/* Local style override: make AntD Switch checked color black */}
+      <style>{`
+        /* make checked switch background black */
+        .ant-switch.ant-switch-checked {
+          background-color: #000 !important;
+          border-color: #000 !important;
+        }
+        /* ensure inner knob blends nicely */
+        .ant-switch-checked .ant-switch-inner {
+          background-color: #000 !important;
+        }
+        /* a tiny visual tweak to switch when disabled */
+        .ant-switch-disabled {
+          opacity: 0.6;
+        }
+      `}</style>
+
       {/* Header */}
       <div className="p-6 border-b bg-white sticky top-0 z-20">
         <div className="max-w-7xl mx-auto flex items-start justify-between gap-6">
           <div>
-            <h1 className="text-2xl font-bold flex items-center gap-2">
-              <SettingOutlined className="text-xl" />
-              Cấu hình hệ thống
+            <h1 className="text-2xl font-bold flex items-center gap-3 text-black">
+              <SettingOutlined className="text-xl text-black" />
+              <span>System Settings</span>
             </h1>
-            <p className="text-gray-600">Thiết lập chung, tồn kho, thông báo, tích hợp và quản lý người dùng.</p>
+            <p className="text-gray-700">
+              General settings, notifications and user management.
+            </p>
           </div>
 
           <div className="flex items-center gap-3">
             <button
               onClick={() => setShowAuditModal(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-700 rounded-lg border"
-              title="Xem audit logs"
+              className="flex items-center gap-2 px-4 py-2 border border-black bg-white hover:bg-black hover:text-white text-black rounded-sm transition-colors duration-300"
+              title="View audit logs"
             >
-              <EyeOutlined /> Xem audit
+              <EyeOutlined /> View audit
             </button>
 
             <button
               onClick={save}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg shadow"
-              title="Lưu"
+              className="flex items-center gap-2 px-4 py-2 border border-black bg-black hover:bg-white hover:text-black text-white rounded-sm transition-colors duration-300"
+              title="Save"
             >
-              <SaveOutlined /> Lưu
+              <SaveOutlined /> Save
             </button>
 
             <button
               onClick={resetDefaults}
-              className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-700 rounded-lg border"
-              title="Reset về mặc định"
+              className="flex items-center gap-2 px-4 py-2 border border-black bg-white hover:bg-black hover:text-white text-red-500 rounded-sm transition-colors duration-300"
+              title="Reset to defaults"
             >
               <RollbackOutlined /> Reset
             </button>
@@ -236,19 +320,15 @@ export default function SettingsPage(): JSX.Element {
         </div>
       </div>
 
-      {/* MAIN CONTENT: scrollable */}
+      {/* MAIN CONTENT */}
       <div className="flex-1 overflow-y-auto p-6">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left column */}
+          {/* Main column */}
           <div className="space-y-6 lg:col-span-2">
-            <section className="bg-white rounded-2xl p-6 shadow-sm border">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="font-semibold text-lg flex items-center gap-2"><HomeOutlined /> Thông tin công ty</h2>
-              </div>
-
+            <Section title="Company Information" icon={<HomeOutlined />}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Tên công ty</label>
+                  <Label>Name</Label>
                   <input
                     className="mt-1 p-3 border rounded-lg w-full"
                     value={settings.companyName}
@@ -257,7 +337,7 @@ export default function SettingsPage(): JSX.Element {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Email liên hệ</label>
+                  <Label>Email</Label>
                   <input
                     className="mt-1 p-3 border rounded-lg w-full"
                     value={settings.companyEmail}
@@ -266,7 +346,7 @@ export default function SettingsPage(): JSX.Element {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Số điện thoại</label>
+                  <Label>Phone</Label>
                   <input
                     className="mt-1 p-3 border rounded-lg w-full"
                     value={settings.phone || ""}
@@ -275,7 +355,7 @@ export default function SettingsPage(): JSX.Element {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Địa chỉ</label>
+                  <Label>Address</Label>
                   <input
                     className="mt-1 p-3 border rounded-lg w-full"
                     value={settings.address}
@@ -283,210 +363,61 @@ export default function SettingsPage(): JSX.Element {
                   />
                 </div>
               </div>
+            </Section>
 
-              <div className="mt-4 flex items-center gap-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden border">
-                    {settings.logoDataUrl ? (
-                      <img src={settings.logoDataUrl} alt="logo" className="w-full h-full object-contain" />
-                    ) : (
-                      <div className="text-gray-400">Logo</div>
-                    )}
-                  </div>
-
-                  <div className="flex flex-col gap-2">
-                    <label className="flex items-center gap-2 cursor-pointer px-3 py-2 bg-blue-50 rounded-lg">
-                      <UploadOutlined />
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => onLogoChange(e.target.files ? e.target.files[0] : null)}
-                        className="hidden"
-                      />
-                      Tải logo
-                    </label>
-
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => setShowLogoPreview(true)}
-                        disabled={!settings.logoDataUrl}
-                        className="px-3 py-1 border rounded disabled:opacity-50"
-                      >
-                        Xem
-                      </button>
-                      <button
-                        onClick={() => update("logoDataUrl", undefined)}
-                        className="px-3 py-1 border rounded"
-                        disabled={!settings.logoDataUrl}
-                      >
-                        Xóa
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            <section className="bg-white rounded-2xl p-6 shadow-sm border">
-              <h2 className="font-semibold text-lg flex items-center gap-2"><DatabaseOutlined /> Tồn kho & Kho</h2>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                <div>
-                  <label className="block text-sm text-gray-700">Kho mặc định</label>
-                  <select
-                    value={settings.defaultWarehouse}
-                    onChange={(e) => update("defaultWarehouse", e.target.value)}
-                    className="mt-1 p-3 border rounded-lg w-full"
-                  >
-                    <option>Kho Hồ Chí Minh</option>
-                    <option>Kho Hà Nội</option>
-                    <option>Kho Đà Nẵng</option>
-                    <option>Kho Cần Thơ</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm text-gray-700">Ngưỡng sắp hết (sản phẩm)</label>
-                  <input
-                    type="number"
-                    min={0}
-                    className="mt-1 p-3 border rounded-lg w-full"
-                    value={settings.lowStockThreshold}
-                    onChange={(e) => update("lowStockThreshold", Number(e.target.value))}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm text-gray-700">Auto reorder</label>
-                  <div className="mt-1 flex items-center gap-3">
-                    <label className="inline-flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={settings.autoReorder}
-                        onChange={(e) => update("autoReorder", e.target.checked)}
-                        className="w-4 h-4"
-                      />
-                      <span className="text-sm ml-1">Bật tự động đặt hàng (khi &lt;= ngưỡng)</span>
-                    </label>
-                  </div>
-                </div>
-
-                {settings.autoReorder && (
-                  <div>
-                    <label className="block text-sm text-gray-700">Số lượng đặt mỗi lần</label>
-                    <input
-                      type="number"
-                      min={1}
-                      className="mt-1 p-3 border rounded-lg w-full"
-                      value={settings.autoReorderQuantity}
-                      onChange={(e) => update("autoReorderQuantity", Number(e.target.value))}
-                    />
-                  </div>
-                )}
-              </div>
-            </section>
-
-            <section className="bg-white rounded-2xl p-6 shadow-sm border">
-              <h2 className="font-semibold text-lg flex items-center gap-2"><BellOutlined /> Thông báo</h2>
-
-              <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="flex items-center gap-3">
-                    <input
-                      type="checkbox"
-                      checked={settings.notifications.enabled}
-                      onChange={(e) => updateNested("notifications", { enabled: e.target.checked })}
-                    />
-                    <span className="text-sm">Bật thông báo hệ thống</span>
-                  </label>
-
-                  <div className="mt-3 space-y-2">
-                    <div className="text-sm text-gray-600">Kênh nhận thông báo</div>
-                    <div className="flex gap-2 mt-2">
-                      <label className={`px-3 py-1 border rounded cursor-pointer ${settings.notifications.channels.includes("email") ? "bg-blue-50 border-blue-200" : ""}`}>
-                        <input type="checkbox" checked={settings.notifications.channels.includes("email")} onChange={() => toggleNotificationChannel("email")} /> Email
-                      </label>
-                      <label className={`px-3 py-1 border rounded cursor-pointer ${settings.notifications.channels.includes("sms") ? "bg-blue-50 border-blue-200" : ""}`}>
-                        <input type="checkbox" checked={settings.notifications.channels.includes("sms")} onChange={() => toggleNotificationChannel("sms")} /> SMS
-                      </label>
-                      <label className={`px-3 py-1 border rounded cursor-pointer ${settings.notifications.channels.includes("webhook") ? "bg-blue-50 border-blue-200" : ""}`}>
-                        <input type="checkbox" checked={settings.notifications.channels.includes("webhook")} onChange={() => toggleNotificationChannel("webhook")} /> Webhook
-                      </label>
-                    </div>
-                  </div>
-                </div>
-
+            <Section title="Notifications" icon={<BellOutlined />}>
+              <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-3">
-                  <label className="flex items-center gap-2">
-                    <input type="checkbox" checked={settings.notifications.notifyLowStock} onChange={(e) => updateNested("notifications", { notifyLowStock: e.target.checked })} />
-                    <span className="text-sm">Thông báo khi sắp hết hàng</span>
-                  </label>
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={settings.notifications.notifyLowStock}
+                      onChange={(checked) =>
+                        updateNested("notifications", {
+                          notifyLowStock: checked,
+                        })
+                      }
+                      aria-label="Notify low stock"
+                    />
+                    <span>Notify when stock is low</span>
+                  </div>
 
-                  <label className="flex items-center gap-2">
-                    <input type="checkbox" checked={settings.notifications.notifyNewOrder} onChange={(e) => updateNested("notifications", { notifyNewOrder: e.target.checked })} />
-                    <span className="text-sm">Thông báo khi có đơn hàng mới</span>
-                  </label>
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={settings.notifications.notifyNewOrder}
+                      onChange={(checked) =>
+                        updateNested("notifications", {
+                          notifyNewOrder: checked,
+                        })
+                      }
+                      aria-label="Notify new order"
+                    />
+                    <span>Notify on new orders</span>
+                  </div>
+                </div>
+                <div>
+                  <div className="flex items-center gap-3">
+                    <Switch
+                      checked={settings.notifications.enabled}
+                      onChange={(checked) =>
+                        updateNested("notifications", { enabled: checked })
+                      }
+                      aria-label="Enable notifications"
+                    />
+                    <span>Enable system notifications</span>
+                  </div>
                 </div>
               </div>
-            </section>
+            </Section>
 
-            <section className="bg-white rounded-2xl p-6 shadow-sm border">
-              <h2 className="font-semibold text-lg flex items-center gap-2"><LinkOutlined /> Tích hợp</h2>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                <div>
-                  <label className="block text-sm text-gray-700">Kế toán (provider)</label>
-                  <input
-                    className="mt-1 p-3 border rounded-lg w-full"
-                    value={settings.integrations.accounting?.provider || ""}
-                    onChange={(e) => updateNested<IntegrationSettings, "integrations">("integrations", { accounting: { ...(settings.integrations.accounting || {}), provider: e.target.value } })}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm text-gray-700">API Key Kế toán</label>
-                  <input
-                    className="mt-1 p-3 border rounded-lg w-full"
-                    value={settings.integrations.accounting?.apiKey || ""}
-                    onChange={(e) => updateNested<IntegrationSettings, "integrations">("integrations", { accounting: { ...(settings.integrations.accounting || {}), provider: e.target.value } })}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm text-gray-700">Giao vận (provider)</label>
-                  <input
-                    className="mt-1 p-3 border rounded-lg w-full"
-                    value={settings.integrations.shipping?.provider || ""}
-                    onChange={(e) => updateNested<IntegrationSettings, "integrations">("integrations", { shipping: { ...(settings.integrations.shipping || {}), provider: e.target.value } })}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm text-gray-700">API Key Giao vận</label>
-                  <input
-                    className="mt-1 p-3 border rounded-lg w-full"
-                    value={settings.integrations.shipping?.apiKey || ""}
-                    onChange={(e) => updateNested<IntegrationSettings, "integrations">("integrations", { shipping: { ...(settings.integrations.shipping || {}), provider: e.target.value } })}
-                  />
-                </div>
-
-                <div className="md:col-span-2">
-                  <label className="block text-sm text-gray-700">Webhook URL (nếu có)</label>
-                  <input
-                    className="mt-1 p-3 border rounded-lg w-full"
-                    value={settings.integrations.webhookUrl || ""}
-                    onChange={(e) => updateNested<IntegrationSettings, "integrations">("integrations", { webhookUrl: e.target.value })}
-                    placeholder="https://example.com/webhook"
-                  />
-                </div>
-              </div>
-            </section>
-
-            <section className="bg-white rounded-2xl p-6 shadow-sm border">
+            <Section title="Users & Roles" icon={<TeamOutlined />}>
               <div className="flex items-center justify-between">
-                <h2 className="font-semibold text-lg flex items-center gap-2"><TeamOutlined /> Người dùng & vai trò</h2>
-                <div className="flex items-center gap-2">
-                  <button onClick={addUser} className="px-3 py-2 bg-blue-600 text-white rounded">Thêm người dùng</button>
+                <div className="text-sm text-gray-500">
+                  Manage system accounts and permissions.
+                </div>
+                <div>
+                  <button className="px-3 py-2 bg-black text-white rounded-sm">
+                    Add user
+                  </button>
                 </div>
               </div>
 
@@ -494,33 +425,56 @@ export default function SettingsPage(): JSX.Element {
                 <table className="w-full">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-4 py-2 text-left text-sm font-semibold">Email</th>
-                      <th className="px-4 py-2 text-left text-sm font-semibold">Vai trò</th>
-                      <th className="px-4 py-2 text-left text-sm font-semibold">Active</th>
-                      <th className="px-4 py-2 text-left text-sm font-semibold">Hành động</th>
+                      <th className="px-4 py-2 text-center text-sm font-semibold">
+                        Email
+                      </th>
+                      <th className="px-4 py-2 text-center text-sm font-semibold">
+                        Role
+                      </th>
+                      <th className="px-4 py-2 text-center text-sm font-semibold">
+                        Active
+                      </th>
+                      <th className="px-4 py-2 text-center text-sm font-semibold"></th>
                     </tr>
                   </thead>
 
                   <tbody className="divide-y">
                     {settings.users.map((u) => (
                       <tr key={u.id} className="hover:bg-gray-50">
-                        <td className="px-4 py-3">{u.email}</td>
-                        <td className="px-4 py-3">
-                          <select value={u.role} onChange={(e) => updateUser(u.id, { role: e.target.value as UserRole["role"] })} className="p-2 border rounded">
+                        <td className="px-4 py-3 text-center">{u.email}</td>
+                        <td className="px-4 py-3 text-center">
+                          <select
+                            value={u.role}
+                            onChange={(e) =>
+                              updateUser(u.id, {
+                                role: e.target.value as UserRole["role"],
+                              })
+                            }
+                            className="p-2 border rounded"
+                          >
                             <option value="admin">Admin</option>
                             <option value="manager">Manager</option>
                             <option value="staff">Staff</option>
                           </select>
                         </td>
-                        <td className="px-4 py-3">
-                          <input type="checkbox" checked={u.active} onChange={(e) => updateUser(u.id, { active: e.target.checked })} />
+                        <td className="px-4 py-3 text-center">
+                          <Switch
+                            checked={u.active}
+                            onChange={(checked) =>
+                              updateUser(u.id, { active: checked })
+                            }
+                            aria-label={`Active ${u.email}`}
+                          />
                         </td>
                         <td className="px-4 py-3">
                           <div className="flex gap-2">
-                            <button onClick={() => updateUser(u.id, { active: !u.active })} className="px-3 py-1 border rounded text-sm">
-                              {u.active ? "Disable" : "Enable"}
+                            <button
+                              type="button"
+                              onClick={() => removeUser(u.id)}
+                              className=" text-red-400 hover:bg-red-200 rounded-full transition-colors"
+                            >
+                              <DeleteOutlined className="p-2" />
                             </button>
-                            <button onClick={() => removeUser(u.id)} className="px-3 py-1 border rounded text-sm text-red-600">Xóa</button>
                           </div>
                         </td>
                       </tr>
@@ -528,52 +482,156 @@ export default function SettingsPage(): JSX.Element {
 
                     {settings.users.length === 0 && (
                       <tr>
-                        <td colSpan={4} className="px-4 py-6 text-center text-gray-400">Chưa có người dùng.</td>
+                        <td
+                          colSpan={4}
+                          className="px-4 py-6 text-center text-gray-400"
+                        >
+                          No users yet.
+                        </td>
                       </tr>
                     )}
                   </tbody>
                 </table>
               </div>
-            </section>
+            </Section>
           </div>
 
-          {/* Right column */}
+          {/* Right column — Redesigned */}
           <aside className="space-y-6">
-            <div className="bg-white rounded-2xl p-6 shadow-sm border">
-              <h3 className="font-semibold mb-2">Tổng quan nhanh</h3>
-              <div className="text-sm text-gray-600 space-y-2">
-                <div><strong>Công ty:</strong> {settings.companyName}</div>
-                <div><strong>Kho mặc định:</strong> {settings.defaultWarehouse}</div>
-                <div><strong>Auto reorder:</strong> {settings.autoReorder ? "Bật" : "Tắt"}</div>
-                <div><strong>Channels:</strong> {settings.notifications.channels.join(", ") || "—"}</div>
+            <div className="bg-white rounded-2xl p-6 shadow-lg border">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h3 className="font-semibold text-lg text-black">
+                    Quick Overview
+                  </h3>
+                  <p className="text-sm text-gray-700 mt-1">
+                    Live snapshot of important settings
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <SmallBadge>Live</SmallBadge>
+                  <div className="text-xs text-gray-500">Updated</div>
+                </div>
+              </div>
+
+              <div className="mt-4 grid grid-cols-1 gap-3 text-black">
+                <div className="flex items-center justify-between">
+                  <div className="text-sm text-gray-700">Company</div>
+                  <div className="text-sm font-medium text-black">
+                    {settings.companyName}
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="text-sm text-gray-700">Default warehouse</div>
+                  <div className="text-sm font-medium text-black">
+                    {settings.defaultWarehouse}
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="text-sm text-gray-700">Auto reorder</div>
+                  <div className="flex items-center gap-2">
+                    <div
+                      className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${
+                        settings.autoReorder
+                          ? "bg-green-100 text-green-800"
+                          : "bg-gray-100 text-gray-600"
+                      }`}
+                    >
+                      {settings.autoReorder ? "Enabled" : "Disabled"}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-start justify-between">
+                  <div className="text-sm text-gray-700">
+                    Notification channels
+                  </div>
+                  <div className="text-sm font-medium text-black text-right">
+                    {settings.notifications.channels.length
+                      ? settings.notifications.channels.join(", ")
+                      : "—"}
+                  </div>
+                </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl p-6 shadow-sm border">
-              <h3 className="font-semibold mb-2">Preview Logo</h3>
-              <div className="w-full h-36 bg-gray-50 rounded-lg flex items-center justify-center">
-                {settings.logoDataUrl ? <img src={settings.logoDataUrl} className="max-h-32 object-contain" alt="logo preview" /> : <div className="text-gray-400">Chưa có logo</div>}
+            <div className="bg-white rounded-2xl p-6 shadow-lg border">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-semibold text-black">Logo & Brand</h3>
+                <div className="text-sm text-gray-500">
+                  Recommended 400×400 • PNG/JPG
+                </div>
               </div>
-              <div className="mt-3 text-sm text-gray-500">Kích thước khuyến nghị: 400×400, PNG/JPG</div>
-            </div>
 
-            <div className="bg-white rounded-2xl p-6 shadow-sm border">
-              <h3 className="font-semibold mb-2">Hành động</h3>
-              <div className="flex flex-col gap-2">
-                <button onClick={save} className="px-3 py-2 bg-blue-600 text-white rounded flex items-center gap-2 justify-center"><SaveOutlined /> Lưu thay đổi</button>
-                <button onClick={resetDefaults} className="px-3 py-2 bg-red-50 text-red-700 rounded flex items-center gap-2 justify-center"><RollbackOutlined /> Reset mặc định</button>
+              <div
+                className="relative border-2 border-dashed border-gray-200 rounded-lg p-4 flex flex-col items-center gap-3 text-center hover:border-gray-400 transition-colors"
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  const f = e.dataTransfer?.files?.[0];
+                  if (f) onLogoChange(f);
+                }}
+                role="button"
+                tabIndex={0}
+                aria-label="Drop logo here or click to upload"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    /* noop */
+                  }
+                }}
+              >
+                {settings.logoDataUrl ? (
+                  <img
+                    src={settings.logoDataUrl}
+                    alt="logo preview"
+                    className="w-28 h-28 object-contain rounded-md border"
+                  />
+                ) : (
+                  <div className="w-28 h-28 flex items-center justify-center rounded-md bg-gray-50 border">
+                    <UploadOutlined/>
+                  </div>
+                )}
+                <div className="text-sm text-gray-600">
+                  {settings.logoDataUrl
+                    ? "Drag & drop to replace"
+                    : "Drag & drop logo here or click to upload"}
+                </div>
+                <label className="inline-flex items-center gap-2 px-3 py-2 bg-gray-100 text-gray-800 rounded-sm cursor-pointer">
+                  <UploadOutlined />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) =>
+                      onLogoChange(e.target.files ? e.target.files[0] : null)
+                    }
+                    className="hidden"
+                  />
+                  Upload
+                </label>
+                <div className="w-full flex gap-2 mt-3">
+                  <button
+                    onClick={() => setShowLogoPreview(true)}
+                    disabled={!settings.logoDataUrl}
+                    className="flex-1 px-3 py-2 rounded-sm border text-sm disabled:opacity-50"
+                  >
+                    Preview
+                  </button>
+                  <button
+                    onClick={() => update("logoDataUrl", undefined)}
+                    disabled={!settings.logoDataUrl}
+                    className="px-3 py-2 rounded-sm border text-sm text-red-600 disabled:opacity-50"
+                  >
+                    Remove
+                  </button>
+                </div>
               </div>
             </div>
           </aside>
         </div>
       </div>
-
-      {/* Floating message */}
-      {message && (
-        <div className="fixed right-6 bottom-6 bg-white border shadow px-4 py-3 rounded-lg z-50">
-          <div className="text-sm">{message}</div>
-        </div>
-      )}
 
       {/* Logo preview modal */}
       {showLogoPreview && settings.logoDataUrl && (
@@ -581,10 +639,16 @@ export default function SettingsPage(): JSX.Element {
           <div className="bg-white rounded-lg p-4 max-w-lg w-full">
             <div className="flex justify-between items-start mb-3">
               <h3 className="font-semibold">Preview Logo</h3>
-              <button onClick={() => setShowLogoPreview(false)} className="p-1"><CloseOutlined /></button>
+              <button onClick={() => setShowLogoPreview(false)} className="p-1">
+                <CloseOutlined />
+              </button>
             </div>
             <div className="flex items-center justify-center">
-              <img src={settings.logoDataUrl} alt="logo preview" className="max-h-80 object-contain" />
+              <img
+                src={settings.logoDataUrl}
+                alt="logo preview"
+                className="max-h-80 object-contain"
+              />
             </div>
           </div>
         </div>
@@ -596,14 +660,18 @@ export default function SettingsPage(): JSX.Element {
           <div className="bg-white rounded-lg p-4 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-3">
               <h3 className="font-semibold">Audit logs</h3>
-              <button onClick={() => setShowAuditModal(false)} className="p-1"><CloseOutlined /></button>
+              <button onClick={() => setShowAuditModal(false)} className="p-1">
+                <CloseOutlined />
+              </button>
             </div>
 
             <div className="space-y-3">
               {auditLogs.map((a) => (
                 <div key={a.id} className="p-3 border rounded-md bg-gray-50">
                   <div className="flex justify-between items-center">
-                    <div className="text-sm text-gray-600">{a.date} • {a.actor}</div>
+                    <div className="text-sm text-gray-700">
+                      {a.date} • {a.actor}
+                    </div>
                     <div className="text-sm text-gray-500">#{a.id}</div>
                   </div>
                   <div className="mt-1">{a.action}</div>

@@ -14,7 +14,7 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 import { useState } from "react";
-import { StatCard } from "./StatCard";
+import { StatCard } from "../StatCard";
 
 interface ImportHistory {
   id: number;

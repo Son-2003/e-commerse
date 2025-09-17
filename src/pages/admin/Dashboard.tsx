@@ -218,13 +218,13 @@ export default function Dashboard() {
 
   return (
     <div className="h-screen flex flex-col bg-gray-50">
-      <div className="p-6 border-b bg-white shadow-sm sticky top-0 z-10">
-        <h1 className="text-2xl font-bold text-black">
-          Analytics Dashboard
-        </h1>
-        <p className="text-gray-500">
-          Comprehensive overview of business metrics
-        </p>
+      <div className="p-6 border-b bg-white sticky top-0 z-10">
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-2xl font-bold text-black">Analytics Dashboard</h1>
+          <p className="text-gray-500">
+            Comprehensive overview of business metrics
+          </p>
+        </div>
       </div>
 
       <div className="flex-1 overflow-y-auto p-6">

@@ -1,4 +1,12 @@
-import { CheckCircleOutlined, CloseOutlined, FileTextOutlined, InboxOutlined, MinusCircleOutlined, SearchOutlined, ShoppingCartOutlined } from "@ant-design/icons";
+import {
+  CheckCircleOutlined,
+  CloseOutlined,
+  FileTextOutlined,
+  InboxOutlined,
+  MinusCircleOutlined,
+  SearchOutlined,
+  ShoppingCartOutlined,
+} from "@ant-design/icons";
 import { useMemo, useState } from "react";
 
 interface Product {
@@ -7,27 +15,26 @@ interface Product {
   category: string;
   price: number;
   stock: number;
-  status: "active" | "inactive";
-  image: string;
+  status?: "active" | "inactive";
+  image?: string;
   description?: string;
   supplier?: string;
-  minStock: number;
-  createdAt: string;
+  minStock?: number;
+  createdAt?: string;
 }
 
 interface ImportHistory {
-  id: number;
+  id?: number;
   productId: number;
-  date: string;
+  date?: string;
   quantity: number;
   unitPrice: number;
-  totalCost: number;
-  supplier: string;
-  invoiceNumber: string;
-  warehouse: string;
-  importedBy: string;
+  totalCost?: number;
+  supplier?: string;
+  invoiceNumber?: string;
+  importedBy?: string;
   notes?: string;
-  status: "completed" | "pending" | "cancelled";
+  status?: "completed" | "pending" | "cancelled";
   batchNumber?: string;
   expiryDate?: string;
 }
@@ -81,66 +88,6 @@ const initialProducts: Product[] = [
   },
 ];
 
-const importHistory: ImportHistory[] = [
-  {
-    id: 1,
-    productId: 1,
-    date: "2025-09-01",
-    quantity: 10,
-    unitPrice: 1400,
-    totalCost: 14000,
-    supplier: "Apple Inc.",
-    invoiceNumber: "AP-2025-001",
-    warehouse: "Kho Hồ Chí Minh",
-    importedBy: "Nguyễn Văn A",
-    status: "completed",
-    batchNumber: "BATCH-001",
-    notes: "Hàng chính hãng, bảo hành 12 tháng",
-  },
-  {
-    id: 2,
-    productId: 1,
-    date: "2025-09-05",
-    quantity: 5,
-    unitPrice: 1420,
-    totalCost: 7100,
-    supplier: "Apple Inc.",
-    invoiceNumber: "AP-2025-002",
-    warehouse: "Kho Hà Nội",
-    importedBy: "Trần Thị B",
-    status: "completed",
-    batchNumber: "BATCH-002",
-  },
-  {
-    id: 3,
-    productId: 2,
-    date: "2025-09-02",
-    quantity: 20,
-    unitPrice: 100,
-    totalCost: 2000,
-    supplier: "Nike Vietnam",
-    invoiceNumber: "NK-2025-001",
-    warehouse: "Kho Hồ Chí Minh",
-    importedBy: "Lê Văn C",
-    status: "completed",
-    batchNumber: "BATCH-003",
-  },
-  {
-    id: 4,
-    productId: 3,
-    date: "2025-09-08",
-    quantity: 3,
-    unitPrice: 2400,
-    totalCost: 7200,
-    supplier: "Apple Inc.",
-    invoiceNumber: "AP-2025-003",
-    warehouse: "Kho Đà Nẵng",
-    importedBy: "Phạm Thị D",
-    status: "pending",
-    batchNumber: "BATCH-004",
-  },
-];
-
 export const MultiProductImportModal = ({
   products,
   onClose,
@@ -169,19 +116,19 @@ export const MultiProductImportModal = ({
     );
   }, [products, searchTerm]);
 
-  // const addProduct = (product: Product) => {
-  //   if (!importItems.find((item) => item.productId === product.id)) {
-  //     setImportItems([
-  //       ...importItems,
-  //       {
-  //         productId: product.id,
-  //         quantity: 1,
-  //         unitPrice: product.price,
-  //         notes: "",
-  //       },
-  //     ]);
-  //   }
-  // };
+  const addProduct = (product: Product) => {
+    if (!importItems.find((item) => item.productId === product.id)) {
+      setImportItems([
+        ...importItems,
+        {
+          productId: product.id,
+          quantity: 1,
+          unitPrice: product.price,
+          notes: "",
+        },
+      ]);
+    }
+  };
 
   const removeProduct = (productId: number) => {
     setImportItems(importItems.filter((item) => item.productId !== productId));
@@ -227,8 +174,8 @@ export const MultiProductImportModal = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-2xl w-full max-w-7xl max-h-[95vh] overflow-hidden">
+    <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-sm w-full max-w-7xl max-h-[95vh] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="bg-black text-white p-6 flex justify-between items-center">
           <div>
@@ -239,13 +186,13 @@ export const MultiProductImportModal = ({
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-white/10 rounded-full transition-colors"
+            className="hover:bg-white/10 rounded-full transition-colors"
           >
-            <CloseOutlined className="text-xl" />
+            <CloseOutlined className="text-xl p-2" />
           </button>
         </div>
 
-        <div className="flex h-[calc(95vh-120px)]">
+        <div className="flex-1 flex overflow-hidden">
           {/* Left Panel - Product Selection */}
           <div className="w-2/5 border-r border-gray-200 flex flex-col">
             <div className="p-4 border-b bg-gray-50">
@@ -265,52 +212,50 @@ export const MultiProductImportModal = ({
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-4">
-              <div className="space-y-3">
-                {filteredProducts.map((product) => {
-                  const isSelected = importItems.some(
-                    (item) => item.productId === product.id
-                  );
-                  return (
-                    <div
-                      key={product.id}
-                      className={`border rounded-lg p-3 cursor-pointer transition-all duration-200 ${
-                        isSelected
-                          ? "border-black bg-black/5 shadow-md"
-                          : "border-gray-200 hover:border-gray-300 hover:shadow-sm"
-                      }`}
-                      // onClick={() => !isSelected && addProduct(product)}
-                    >
-                      <div className="flex items-center gap-3">
-                        <img
-                          src={product.image}
-                          alt={product.name}
-                          className="w-12 h-12 rounded-md object-cover"
-                        />
-                        <div className="flex-1">
-                          <h4 className="font-medium text-gray-800 text-sm">
-                            {product.name}
-                          </h4>
-                          <p className="text-xs text-gray-500">
-                            {product.category} • ${product.price}
-                          </p>
-                          <p className="text-xs text-gray-400">
-                            Stock: {product.stock}
-                          </p>
-                        </div>
-                        {isSelected && (
-                          <CheckCircleOutlined className="text-black text-lg" />
-                        )}
+            <div className="flex-1 overflow-y-auto p-4 space-y-3">
+              {filteredProducts.map((product) => {
+                const isSelected = importItems.some(
+                  (item) => item.productId === product.id
+                );
+                return (
+                  <div
+                    key={product.id}
+                    className={`border rounded-sm p-3 cursor-pointer transition-all duration-200 ${
+                      isSelected
+                        ? "border-black bg-black/5 shadow-md"
+                        : "border-gray-200 hover:border-gray-300 hover:shadow-sm"
+                    }`}
+                    onClick={() => !isSelected && addProduct(product)}
+                  >
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        className="w-16 h-16 rounded-md object-cover bg-black"
+                      />
+                      <div className="flex-1">
+                        <h4 className="font-medium text-gray-800 text-sm">
+                          {product.name}
+                        </h4>
+                        <p className="text-xs text-gray-500">
+                          {product.category} • ${product.price}
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          Stock: {product.stock}
+                        </p>
                       </div>
+                      {isSelected && (
+                        <CheckCircleOutlined className="text-black text-lg" />
+                      )}
                     </div>
-                  );
-                })}
-              </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
           {/* Right Panel - Import Details */}
-          <div className="w-3/5 flex flex-col">
+          <div className="w-3/5 flex flex-col overflow-y-auto">
             {/* Common Information */}
             <div className="p-6 border-b bg-gray-50">
               <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
@@ -331,25 +276,6 @@ export const MultiProductImportModal = ({
                     className="w-full p-2 border border-gray-300 rounded-sm focus:outline-none focus:ring-1 focus:ring-black/20"
                     placeholder="Enter supplier name"
                   />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Warehouse
-                  </label>
-                  <select
-                    value={commonData.warehouse}
-                    onChange={(e) =>
-                      setCommonData({
-                        ...commonData,
-                        warehouse: e.target.value,
-                      })
-                    }
-                    className="w-full p-2 border border-gray-300 rounded-sm focus:outline-none focus:ring-1 focus:ring-black/20"
-                  >
-                    <option value="Kho Hồ Chí Minh">Kho Hồ Chí Minh</option>
-                    <option value="Kho Hà Nội">Kho Hà Nội</option>
-                    <option value="Kho Đà Nẵng">Kho Đà Nẵng</option>
-                  </select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
