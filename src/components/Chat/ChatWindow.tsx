@@ -2,14 +2,14 @@ import { ChatMessage } from "common/models/chat";
 import { useEffect, useRef, useState } from "react";
 import { MessageBubble } from "./MessageBubble";
 import {
-  CameraOutlined,
+  ArrowLeftOutlined,
   MenuOutlined,
-  PhoneOutlined,
   PlusCircleOutlined,
   SendOutlined,
 } from "@ant-design/icons";
-import { useSelector } from "react-redux";
-import { RootState } from "@redux/store";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@redux/store";
+import { useNavigate } from "react-router-dom";
 
 export const ChatWindow: React.FC<{
   messages: ChatMessage[];
@@ -19,8 +19,10 @@ export const ChatWindow: React.FC<{
   isOnline?: boolean;
   onOpenSidebar?: () => void;
 }> = ({ messages, onSend, chatName, chatAvatar, isOnline, onOpenSidebar }) => {
+  const dispatch = useDispatch<AppDispatch>();
   const [text, setText] = useState("");
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const navigate = useNavigate();
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const { userInfo, adminInfo } = useSelector((state: RootState) => state.auth);
 
@@ -53,10 +55,15 @@ export const ChatWindow: React.FC<{
             >
               {!userInfo ? <MenuOutlined /> : ""}
             </button>
-
+            {userInfo && (
+              <ArrowLeftOutlined
+                onClick={() => navigate("/")}
+                className="p-2 rounded-full text-black hover:bg-gray-100 transition-colors"
+              />
+            )}
             <div className="relative flex-shrink-0">
               <img
-                src={chatAvatar || "https://i.pravatar.cc/50?img=1"}
+                src={chatAvatar}
                 alt="avatar"
                 className="w-10 h-10 lg:w-12 lg:h-12 rounded-full object-cover border-2 border-white shadow-sm"
               />
@@ -72,11 +79,6 @@ export const ChatWindow: React.FC<{
               <p className="text-sm text-gray-500">
                 {isOnline ? "Online" : "Online 2 minutes"}
               </p>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <PhoneOutlined className="text-xl p-2 text-gray-500 hover:text-black hover:bg-gray-100 rounded-full transition-colors" />
-              <CameraOutlined className="text-xl p-2 text-gray-500 hover:text-black hover:bg-gray-100 rounded-full transition-colors" />
             </div>
           </div>
         </div>

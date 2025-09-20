@@ -211,7 +211,7 @@ export default function ProductManagement(): JSX.Element {
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [searchTerm, setSearchTerm] = useState("");
   const [dateFrom, setDateFrom] = useState<Date | null>(null);
-  const [selectedStatus, setSelectedStatus] = useState("ALL STATUS");
+  const [selectedStatus, setSelectedStatus] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState<Product | null>(null);
   const [showHistoryModal, setShowHistoryModal] = useState<Product | null>(

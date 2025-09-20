@@ -7,6 +7,8 @@ import { useChat } from "../../hook/useChat";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchMessagesThunk } from "@redux/thunk/chatThunk";
+import { getInfoAdminThunk } from "@redux/thunk/authThunk";
+import { AVA_DEFAULT } from "common/constant";
 
 const Chat: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -53,7 +55,7 @@ const Chat: React.FC = () => {
           messages={messages}
           onSend={handleSend}
           chatName={"Customer service"}
-          chatAvatar={"/admin-avatar.png"}
+          chatAvatar={AVA_DEFAULT}
           isOnline={true}
         />
       </div>

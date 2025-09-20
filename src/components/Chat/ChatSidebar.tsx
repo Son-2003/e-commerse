@@ -43,14 +43,14 @@ export const ChatSidebar: React.FC<{
             <div className="flex items-center gap-x-2 text-lg">
               {!adminInfo && (
                 <button onClick={handleNavigate}>
-                  <LeftOutlined className="hidden lg:block rounded-full p-2 hover:bg-gray-300 hover:text-white transition-colors" />
+                  <LeftOutlined className="hidden lg:block rounded-sm p-2 hover:bg-gray-300 hover:text-white transition-colors" />
                 </button>
               )}
 
               <h2 className="font-bold text-2xl text-gray-800">Chats</h2>
             </div>
             <button onClick={onClose}>
-              <LeftOutlined className="lg:hidden p-2 rounded-full hover:bg-gray-300 hover:text-white transition-colors" />
+              <LeftOutlined className="lg:hidden p-2 rounded-sm hover:bg-gray-300 hover:text-white transition-colors" />
             </button>
           </div>
 
@@ -60,7 +60,7 @@ export const ChatSidebar: React.FC<{
               <input
                 type="text"
                 placeholder="Search conversations..."
-                className="w-full pl-4 pr-10 py-3 bg-gray-50 border border-gray-200 rounded-full text-sm outline-none"
+                className="w-full pl-4 pr-10 py-3 bg-gray-50 border border-gray-200 rounded-sm text-sm outline-none"
               />
               <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
                 <SearchOutlined className="text-gray-500"/>
