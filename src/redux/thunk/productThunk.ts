@@ -26,6 +26,29 @@ export const getAllProductsThunk = createAsyncThunk<
   }
 );
 
+export const filterProductsThunk = createAsyncThunk<
+  ResponseEntityPagination<ProductResponse>,
+  { pageNo: number; pageSize: number; sortBy: string; sortDir: string, request: SearchProductRequest }
+>(
+  "product/filterProductsThunk",
+  async ({ pageNo, pageSize, sortBy, sortDir, request }, thunkAPI) => {
+    try {
+      const data = await ProductService.getAllProducts(
+        pageNo,
+        pageSize,
+        sortBy,
+        sortDir,
+        request
+      );
+      return data;
+    } catch (error: any) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || "filter products failed"
+      );
+    }
+  }
+);
+
 export const getProductThunk = createAsyncThunk<ProductResponse, number>(
   "product/getProduct",
   async (id, thunkAPI) => {

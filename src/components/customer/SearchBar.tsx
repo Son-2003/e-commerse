@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { ShopContext } from "../../context/ShopContext";
 import { assets } from "../../assets/assets";
 import { useDebounce } from "../../hook/useDebounce";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 interface SearchBarProps {
   visible: boolean;
@@ -14,15 +14,24 @@ const SearchBar = ({ visible, setVisible }: SearchBarProps) => {
   const [localValue, setLocalValue] = useState("");
   const debouncedValue = useDebounce(localValue, 500);
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     setSearch(debouncedValue);
   }, [debouncedValue, setSearch]);
 
+  useEffect(() => {
+    if (location.pathname !== "/collection") {
+      setLocalValue("");
+      setSearch("");
+    }
+  }, [location.pathname, setSearch]);
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       setSearch(localValue.trim());
       navigate("/collection");
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
@@ -46,7 +55,10 @@ const SearchBar = ({ visible, setVisible }: SearchBarProps) => {
           <img
             src={assets.cross_icon}
             className="inline w-3 cursor-pointer"
-            onClick={() => setVisible(false)}
+            onClick={() => {
+              setVisible(false);
+              setLocalValue("");
+            }}
             alt=""
           />
         </div>

@@ -1,4 +1,4 @@
-import { getAllProductsThunk, getProductThunk } from "@redux/thunk/productThunk";
+import { filterProductsThunk, getAllProductsThunk, getProductThunk } from "@redux/thunk/productThunk";
 import {
   ActionReducerMapBuilder,
   createSlice,
@@ -9,6 +9,7 @@ import { ProductResponse } from "common/models/product";
 
 interface ProductState {
   products: ResponseEntityPagination<ProductResponse>;
+  filterProducts: ResponseEntityPagination<ProductResponse>;
   productDetail: ProductResponse | null;
   loadingProduct: boolean;
   errorProduct: string | null;
@@ -16,6 +17,14 @@ interface ProductState {
 
 const initialState: ProductState = {
   products: {
+    pageNo: 0,
+    pageSize: 10,
+    totalPages: 0,
+    totalElements: 0,
+    last: false,
+    content: [],
+  },
+  filterProducts: {
     pageNo: 0,
     pageSize: 10,
     totalPages: 0,
@@ -34,6 +43,7 @@ const productSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     getAllProducts(builder);
+    filterProducts(builder)
     getProduct(builder);
   },
 });
@@ -59,6 +69,31 @@ function getAllProducts(builder: ActionReducerMapBuilder<ProductState>) {
       (state, action: PayloadAction<any>) => {
         state.loadingProduct = false;
         state.errorProduct = action.payload || "Get all products failed";
+      }
+    );
+}
+
+function filterProducts(builder: ActionReducerMapBuilder<ProductState>) {
+  builder
+    .addCase(filterProductsThunk.pending, (state) => {
+      state.loadingProduct = true;
+      state.errorProduct = null;
+    })
+    .addCase(
+      filterProductsThunk.fulfilled,
+      (
+        state,
+        action: PayloadAction<ResponseEntityPagination<ProductResponse>>
+      ) => {
+        state.loadingProduct = false;
+        state.filterProducts = action.payload;
+      }
+    )
+    .addCase(
+      filterProductsThunk.rejected,
+      (state, action: PayloadAction<any>) => {
+        state.loadingProduct = false;
+        state.errorProduct = action.payload || "Filter products failed";
       }
     );
 }

@@ -8,14 +8,13 @@ import { Pagination, Spin } from "antd";
 import LoadingSpinner from "components/LoadingSpinner";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@redux/store";
-import { getAllProductsThunk } from "@redux/thunk/productThunk";
+import { filterProductsThunk, getAllProductsThunk } from "@redux/thunk/productThunk";
 import { EntityStatus } from "common/enums/EntityStatus";
 import { Category } from "common/enums/Category";
 import { SubCategory } from "common/enums/SubCategory";
 
 const Collection = () => {
   const { search } = useContext(ShopContext);
-  const [filterProducts, setFilterProducts] = useState<ProductResponse[]>([]);
   const [category, setCategory] = useState<Category[]>([]);
   const [subCategory, setSubCategory] = useState<SubCategory[]>([]);
   const [sortOption, setSortOption] = useState("relavent");
@@ -25,7 +24,7 @@ const Collection = () => {
   const [pageSize, setPageSize] = useState(10);
 
   const dispatch = useDispatch<AppDispatch>();
-  const { products, loadingProduct } = useSelector(
+  const { filterProducts, loadingProduct } = useSelector(
     (state: RootState) => state.product
   );
   const searchRequest: SearchProductRequest = {
@@ -37,7 +36,7 @@ const Collection = () => {
 
   useEffect(() => {
     dispatch(
-      getAllProductsThunk({
+      filterProductsThunk({
         pageNo: currentPage - 1,
         pageSize: pageSize,
         sortBy: sortBySelected,
@@ -95,10 +94,8 @@ const Collection = () => {
     }
   };
 
-  useEffect(() => {
-    // sortProducts()
-    setFilterProducts(products.content.slice(0, 10));
-  }, [products]);
+  console.log(filterProducts);
+  
 
   return (
     <div className="flex flex-col sm:flex-row gap-1 sm:gap-10 pt-10 px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw] h-screen">
@@ -192,11 +189,11 @@ const Collection = () => {
               </select>
             </div>
 
-            {filterProducts.length > 0 ? (
+            {filterProducts.totalElements > 0 ? (
               <>
                 {/* Map Products */}
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 gap-y-6">
-                  {filterProducts.map((item, index) => (
+                  {filterProducts.content.map((item, index) => (
                     <ProductItem
                       key={index}
                       id={item.id}
@@ -214,7 +211,7 @@ const Collection = () => {
                     current={currentPage}
                     pageSize={pageSize}
                     defaultCurrent={1}
-                    total={products.totalElements}
+                    total={filterProducts.totalElements}
                     onChange={(page, size) => {
                       setCurrentPage(page);
                       setPageSize(size);
